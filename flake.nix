@@ -43,13 +43,12 @@
 
       myPkgs = pkgs.buildEnv {
         name = "morshoto-pkg";
-        pathsToLink = [ "/bin" "/share" "/lib" "/include" ];
+        pathsToLink = [ "/bin" "/share" ];
         paths = (with pkgs; [
           git
           curl
 
           google-cloud-sql-proxy
-          cmake
           cocoapods
           diff-pdf
           ffmpeg
@@ -63,20 +62,14 @@
           kubectl
           lazygit
           lftp
-          libpq
-          pkg-config
-          llvm
           maven
           pandoc
           pdftk
           postgresql_16
-          postgresql_16.dev
-          pgConfigShim
           poppler-utils
           pyenv
           qpdf
           ripgrep
-          swig
           tree
           yq-go
         ]) ++ maybeTfenv;
@@ -84,8 +77,23 @@
     in
     {
       packages.${system} = {
-        my-packages = myPkgs;
+        morshoto-pkg = myPkgs;
         default = myPkgs;
+      };
+
+
+      devShells.${system}.default = pkgs.mkShell {
+        packages = with pkgs; [
+          cmake
+          libpq
+          llvm
+          pkg-config
+          postgresql_16
+          postgresql_16.dev
+          pgConfigShim
+          swig
+        ];
+        PG_CONFIG = "${pgConfigShim}/bin/pg_config";
       };
 
       apps.${system}.update = {

@@ -35,6 +35,7 @@
           maven
           pandoc
           pdftk                  # brew: pdftk-java
+          postgresql_16  # または postgresql_15 / postgresql
           qpdf
           ripgrep
           swig

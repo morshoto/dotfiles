@@ -34,8 +34,6 @@ nix flake show
 nix profile list
 ```
 
-## Notes
-
 > [!NOTE]
 > This flake currently targets only `aarch64-darwin` (Apple Silicon macOS)
 

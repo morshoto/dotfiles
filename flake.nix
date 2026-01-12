@@ -57,7 +57,9 @@
         program = toString (pkgs.writeShellScript "update" ''
           set -euo pipefail
           nix flake update
+          nix profile remove my-packages || true
           nix profile add --profile ~/.nix-profile --priority 50 .#my-packages
+
         '');
         meta = {
           description = "Update flake.lock and refresh installed nix profile packages";

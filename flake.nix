@@ -14,6 +14,7 @@
 
       myPkgs = pkgs.buildEnv {
         name = "my-packages-list";
+        pathsToLink = [ "/bin" "/share" "/lib" "/include" ];
         paths = (with pkgs; [
           git
           curl
@@ -38,6 +39,7 @@
           pandoc
           pdftk                  # brew: pdftk-java
           postgresql_16  # または postgresql_15 / postgresql
+          poppler-utils
           qpdf
           ripgrep
           swig

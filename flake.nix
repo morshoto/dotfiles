@@ -12,39 +12,73 @@
 
       maybeTfenv = if pkgs ? tfenv then [ pkgs.tfenv ] else [];
 
+      pgConfigShim = pkgs.writeShellScriptBin "pg_config" ''
+        set -euo pipefail
+
+        # 16.11 に揃える
+        INCLUDEDIR="${pkgs.postgresql_16.dev}/include"
+        INCLUDEDIR_SERVER="${pkgs.postgresql_16.dev}/include/server"
+        LIBDIR="${pkgs.postgresql_16.lib}/lib"
+        BINDIR="${pkgs.postgresql_16}/bin"
+        VERSION="PostgreSQL ${pkgs.postgresql_16.version}"
+
+
+        case "''${1:-}" in
+          --version) echo "$VERSION" ;;
+          --includedir) echo "$INCLUDEDIR" ;;
+          --includedir-server) echo "$INCLUDEDIR_SERVER" ;;
+          --libdir) echo "$LIBDIR" ;;
+          --bindir) echo "$BINDIR" ;;
+          --cppflags|--cflags) echo "-I$INCLUDEDIR -I$INCLUDEDIR_SERVER" ;;
+          --ldflags) echo "-L$LIBDIR" ;;
+          --libs) echo "-L$LIBDIR -lpq" ;;
+          *)
+            echo "pg_config shim (fixed Nix paths). Supported:" >&2
+            echo "  --version --includedir --includedir-server --libdir --bindir --cppflags --cflags --ldflags --libs" >&2
+            exit 2
+            ;;
+        esac
+      '';
+
+
       myPkgs = pkgs.buildEnv {
-        name = "my-packages-list";
+        name = "morshoto-pkg";
         pathsToLink = [ "/bin" "/share" "/lib" "/include" ];
         paths = (with pkgs; [
           git
           curl
 
-          google-cloud-sql-proxy  # brew: cloud-sql-proxy
+          google-cloud-sql-proxy
           cmake
           cocoapods
           diff-pdf
           ffmpeg
+          fvm
           gh
           ghq
           go
           golangci-lint
           graphviz
           jdk17
-          kubectl                # brew: kubernetes-cli
+          kubectl
           lazygit
           lftp
           libpq
+          pkg-config
           llvm
           maven
           pandoc
-          pdftk                  # brew: pdftk-java
-          postgresql_16  # または postgresql_15 / postgresql
+          pdftk
+          postgresql_16
+          postgresql_16.dev
+          pgConfigShim
           poppler-utils
+          pyenv
           qpdf
           ripgrep
           swig
           tree
-          yq-go                  # brew: yq
+          yq-go
         ]) ++ maybeTfenv;
       };
     in

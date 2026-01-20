@@ -69,6 +69,7 @@
           poppler-utils
           pyenv
           qpdf
+          stripe-cli
           ripgrep
           tree
           yq-go

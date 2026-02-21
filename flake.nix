@@ -8,7 +8,12 @@
   outputs = { self, nixpkgs }:
     let
       system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+        inherit system;
+        config = {
+          allowUnfreePredicate = pkg: pkg.pname == "terraform";
+        };
+      };
 
       maybeTfenv = if pkgs ? tfenv then [ pkgs.tfenv ] else [];
 
@@ -62,6 +67,7 @@
           kubectl
           lazygit
           lftp
+          llvmPackages.openmp
           maven
           pandoc
           pdftk
@@ -71,6 +77,7 @@
           qpdf
           stripe-cli
           ripgrep
+          terraform
           tree
           yq-go
         ]) ++ maybeTfenv;

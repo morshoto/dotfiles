@@ -1,13 +1,20 @@
 {
-  description = "CLI tools managed by Nix";
+  description = "morshoto dotfiles";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { nixpkgs, home-manager, ... }:
     let
       system = "aarch64-darwin";
+      username = "shotomorisaki";
+      homeDirectory = "/Users/${username}";
+
       pkgs = import nixpkgs {
         inherit system;
         config = {
@@ -15,107 +22,36 @@
         };
       };
 
-      maybeTfenv = if pkgs ? tfenv then [ pkgs.tfenv ] else [];
-
-      pgConfigShim = pkgs.writeShellScriptBin "pg_config" ''
-        set -euo pipefail
-
-        # 16.11 に揃える
-        INCLUDEDIR="${pkgs.postgresql_16.dev}/include"
-        INCLUDEDIR_SERVER="${pkgs.postgresql_16.dev}/include/server"
-        LIBDIR="${pkgs.postgresql_16.lib}/lib"
-        BINDIR="${pkgs.postgresql_16}/bin"
-        VERSION="PostgreSQL ${pkgs.postgresql_16.version}"
-
-
-        case "''${1:-}" in
-          --version) echo "$VERSION" ;;
-          --includedir) echo "$INCLUDEDIR" ;;
-          --includedir-server) echo "$INCLUDEDIR_SERVER" ;;
-          --libdir) echo "$LIBDIR" ;;
-          --bindir) echo "$BINDIR" ;;
-          --cppflags|--cflags) echo "-I$INCLUDEDIR -I$INCLUDEDIR_SERVER" ;;
-          --ldflags) echo "-L$LIBDIR" ;;
-          --libs) echo "-L$LIBDIR -lpq" ;;
-          *)
-            echo "pg_config shim (fixed Nix paths). Supported:" >&2
-            echo "  --version --includedir --includedir-server --libdir --bindir --cppflags --cflags --ldflags --libs" >&2
-            exit 2
-            ;;
-        esac
-      '';
-
-
-      myPkgs = pkgs.buildEnv {
-        name = "morshoto-pkg";
-        pathsToLink = [ "/bin" "/share" ];
-        paths = (with pkgs; [
-          git
-          curl
-          nodejs_22
-          pnpm
-
-          google-cloud-sql-proxy
-          cocoapods
-          diff-pdf
-          ffmpeg
-          fvm
-          gh
-          ghq
-          go
-          golangci-lint
-          graphviz
-          jdk17
-          kubectl
-          lazygit
-          lftp
-          llvmPackages.openmp
-          maven
-          pandoc
-          pdftk
-          postgresql_16
-          poppler-utils
-          pyenv
-          qpdf
-          stripe-cli
-          ripgrep
-          terraform
-          tree
-          yq-go
-        ]) ++ maybeTfenv;
+      packageSet = import ./nix/packages.nix { inherit pkgs; };
+      apps = import ./nix/apps.nix {
+        inherit pkgs username;
+        homeManager = home-manager;
       };
     in
     {
       packages.${system} = {
-        morshoto-pkg = myPkgs;
-        default = myPkgs;
+        morshoto-pkg = packageSet.packageBundle;
+        default = packageSet.packageBundle;
       };
 
+      devShells.${system}.default = import ./nix/devshell.nix { inherit pkgs; };
 
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          cmake
-          libpq
-          llvm
-          pkg-config
-          postgresql_16
-          postgresql_16.dev
-          pgConfigShim
-          swig
+      apps.${system} = apps;
+
+      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+
+        modules = [
+          ./nix/home/default.nix
+          {
+            home.username = username;
+            home.homeDirectory = homeDirectory;
+            home.stateVersion = "24.11";
+          }
         ];
-        PG_CONFIG = "${pgConfigShim}/bin/pg_config";
-      };
 
-      apps.${system}.update = {
-        type = "app";
-        program = toString (pkgs.writeShellScript "update" ''
-          set -euo pipefail
-          nix flake update
-          nix profile remove morshoto-pkg || true
-          nix profile add --profile ~/.nix-profile --priority 50 .#morshoto-pkg
-        '');
-        meta = {
-          description = "Update flake.lock and refresh installed nix profile packages";
+        extraSpecialArgs = {
+          inherit username homeDirectory;
         };
       };
     };

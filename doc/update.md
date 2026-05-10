@@ -1,14 +1,28 @@
+# Update Flow
 
-```bash
-nix profile remove morshoto-pkg || true
-nix profile add --profile ~/.nix-profile .#morshoto-pkg
-hash -r
-node -v
-pnpm -v
+Update flake inputs and immediately re-apply the Home Manager configuration:
+
+```sh
+nix run .#update
 ```
 
-if `error: An existing package already provides the following file`
+The app performs:
 
-```bash
-nix profile remove --profile ~/.nix-profile nix-cli
+```sh
+nix flake update --flake .
+nix run .#switch
+```
+
+If you want to review lockfile changes before switching, run the steps manually:
+
+```sh
+nix flake update --flake .
+nix build .#homeConfigurations.shotomorisaki.activationPackage
+git diff -- flake.lock
+```
+
+If you still rely on the compatibility profile bundle, refresh it explicitly:
+
+```sh
+nix profile add .#morshoto-pkg
 ```

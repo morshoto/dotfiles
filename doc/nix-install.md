@@ -1,61 +1,51 @@
-# Installing Packages with Nix (This Repo)
+# Install and Switching
 
-This repo exposes a single package bundle via the flake output `morshoto-pkg`.
-Installing it adds all packages listed in `flake.nix` to your Nix profile.
+This repo is primarily applied through Home Manager.
 
-## Install the bundle
+## Apply the configuration
 
-Run from the repo root:
+From the repo root:
+
+```sh
+nix run .#switch
+```
+
+This runs Home Manager for `shotomorisaki` and applies:
+
+- CLI packages from `home.packages`
+- Git and shell settings
+- repo-backed symlinks for Codex and Claude skills
+
+## Compatibility profile install
+
+If you only want the CLI bundle without the rest of the dotfiles config:
 
 ```sh
 nix profile add .#morshoto-pkg
 ```
 
-Notes:
+This compatibility bundle remains available, but `home.packages` is the primary
+source of truth.
 
-- `nix profile install` is a deprecated alias of `add`.
-- You can target a specific profile if needed:
+## Development shell
 
-```sh
-nix profile add --profile ~/.nix-profile --priority 50 .#morshoto-pkg
-```
-
-## Update after editing `flake.nix`
-
-If you add/remove packages in `flake.nix`, re-run the install command to refresh your profile:
+Use the development shell for build-time dependencies such as PostgreSQL headers,
+LLVM, `pkg-config`, and the `pg_config` shim:
 
 ```sh
-nix profile add .#morshoto-pkg
+nix develop
 ```
-
-## Optional: update flake lock + refresh profile
-
-This repo includes an update app that updates `flake.lock` and reinstalls the profile bundle:
-
-```sh
-nix run .#update
-```
-
-## Troubleshooting
-
-- If a package name is unknown, search for it first:
-
-```sh
-nix search nixpkgs <package>
-```
-
-- If `nix profile add` says the package is already added, the profile is already up to date.
 
 ## Validation
 
-Because `openmp` is a runtime library (no CLI binary), validate it via the package closure:
+Inspect the outputs:
 
 ```sh
-nix path-info -r .#morshoto-pkg | rg -i 'openmp|libomp|omp'
+nix flake show
 ```
 
-For a quick yes/no check:
+Build the Home Manager configuration without switching:
 
 ```sh
-nix path-info -r .#morshoto-pkg | rg -q 'openmp-' && echo "openmp present"
+nix build .#homeConfigurations.shotomorisaki.activationPackage
 ```

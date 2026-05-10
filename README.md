@@ -1,42 +1,62 @@
-# nix-cli
+# dotfiles
 
-A personal, reproducible CLI toolchain managed with **Nix flakes** for macOS (Apple Silicon / `aarch64-darwin`).
+Personal dotfiles and CLI tooling managed with Nix flakes on macOS Apple Silicon
+(`aarch64-darwin`).
 
-This repository provides:
+This repo now manages:
 
--   A **stable, reproducible set of CLI tools** via `nix profile`
--   A **separate development shell** (`nix develop`) for build-time dependencies (C/C++ headers, PostgreSQL dev files, etc.)
--   A small **update workflow** to keep dependencies fresh via `nix flake update`
-
-## ✨ Features
-
--   Declarative CLI environment (like a reproducible Homebrew bundle)
--   Clear separation between:
-
-    -   **Daily CLI tools** (profile install)
-    -   **Build / compilation tools** (devShell only)
-
--   PostgreSQL `pg_config` shim for consistent native extension builds
--   Fully flake-based (no legacy `nix-shell`)
+- CLI packages via Home Manager and a compatibility bundle
+- Development-only build tooling via `nix develop`
+- Git and shell settings
+- Codex / Claude skills via repo-backed symlinks
 
 ## Common commands
 
 ```bash
-# Install tools globally
-nix profile add .#my-packages
-# Update dependencies
+# Apply this repo to the current user
+nix run .#switch
+
+# Update flake inputs, then re-apply the config
 nix run .#update
-# Enter build environment
+
+# Enter the development shell
 nix develop
+
 # Show flake outputs
 nix flake show
-# Check installed profile
-nix profile list
+
+# Compatibility install for profile-based usage
+nix profile add .#morshoto-pkg
 ```
 
-> [!NOTE]
-> This flake currently targets only `aarch64-darwin` (Apple Silicon macOS)
+## Layout
 
-## License
+```txt
+.
+├── flake.nix
+├── nix/
+│   ├── apps.nix
+│   ├── devshell.nix
+│   ├── packages.nix
+│   └── home/
+├── codex/skills/
+├── claude/skills/
+├── fish/
+├── zsh/
+├── git/
+└── scripts/
+```
 
-Personal configuration. Use freely at your own risk.
+## Notes
+
+- The Home Manager target is `shotomorisaki`.
+- Skills are linked from this repo using out-of-store symlinks, so edits here apply
+  directly after `nix run .#switch`.
+- `morshoto-pkg` remains available for `nix profile` compatibility, but
+  `home.packages` is the primary source of truth.
+
+## Docs
+
+- [Install and switching](doc/nix-install.md)
+- [Update flow](doc/update.md)
+- [Repo notes](doc/notes.md)

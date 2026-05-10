@@ -1,7 +1,10 @@
-# Documentation Placeholder
+# Documentation
 
-This directory will eventually hold reference documents related to the tooling managed in this repository. You can drop architecture notes, how-tos, or important links here for future use.
+Reference notes for the Nix-managed dotfiles setup.
 
 ## Docs
 
-- [Installing packages with Nix](nix-install.md)
+- [Install and switching](nix-install.md)
+- [Update flow](update.md)
+- [Repo notes](notes.md)
+- [Missing package troubleshooting](missing-package.md)

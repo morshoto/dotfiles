@@ -1,0 +1,14 @@
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+approvals_reviewer = "user"
+
+[features]
+rmcp_client = true
+multi_agent = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 3

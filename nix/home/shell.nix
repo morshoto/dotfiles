@@ -13,9 +13,13 @@
       tf = "terraform";
     };
 
-    initExtra = ''
+    initContent = ''
       export EDITOR="code --wait"
       export LANG="ja_JP.UTF-8"
+
+      if [ -f "$HOME/.config/zsh/extra.zsh" ]; then
+        source "$HOME/.config/zsh/extra.zsh"
+      fi
     '';
   };
 

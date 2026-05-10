@@ -1,10 +1,10 @@
 # Missing Package Troubleshooting
 
-If a package seems missing after `nix run .#switch`, build the activation package
+If a package seems missing after `nix run --impure .#switch`, build the activation package
 first to confirm the configuration evaluates:
 
 ```sh
-nix build .#homeConfigurations.shotomorisaki.activationPackage
+nix build --impure .#homeConfigurations.default.activationPackage
 ```
 
 If you are using the compatibility profile bundle instead, verify the package is

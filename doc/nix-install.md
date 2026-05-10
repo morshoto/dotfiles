@@ -7,10 +7,10 @@ This repo is primarily applied through Home Manager.
 From the repo root:
 
 ```sh
-nix run .#switch
+nix run --impure .#switch
 ```
 
-This runs Home Manager for `shotomorisaki` and applies:
+This runs Home Manager for the current user and applies:
 
 - CLI packages from `home.packages`
 - Git and shell settings
@@ -41,11 +41,11 @@ nix develop
 Inspect the outputs:
 
 ```sh
-nix flake show
+nix flake show --impure
 ```
 
 Build the Home Manager configuration without switching:
 
 ```sh
-nix build .#homeConfigurations.shotomorisaki.activationPackage
+nix build --impure .#homeConfigurations.default.activationPackage
 ```

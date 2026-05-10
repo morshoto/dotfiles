@@ -3,21 +3,21 @@
 Update flake inputs and immediately re-apply the Home Manager configuration:
 
 ```sh
-nix run .#update
+nix run --impure .#update
 ```
 
 The app performs:
 
 ```sh
 nix flake update --flake .
-nix run .#switch
+nix run --impure .#switch
 ```
 
 If you want to review lockfile changes before switching, run the steps manually:
 
 ```sh
 nix flake update --flake .
-nix build .#homeConfigurations.shotomorisaki.activationPackage
+nix build --impure .#homeConfigurations.default.activationPackage
 git diff -- flake.lock
 ```
 

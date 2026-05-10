@@ -12,8 +12,16 @@
   outputs = { nixpkgs, home-manager, ... }:
     let
       system = "aarch64-darwin";
-      username = "shotomorisaki";
-      homeDirectory = "/Users/${username}";
+      username = builtins.getEnv "USER";
+      homeDirectory = builtins.getEnv "HOME";
+
+      _ =
+        if username == "" then
+          throw "USER must be set; run flake commands with --impure."
+        else if homeDirectory == "" then
+          throw "HOME must be set; run flake commands with --impure."
+        else
+          null;
 
       pkgs = import nixpkgs {
         inherit system;
@@ -24,7 +32,7 @@
 
       packageSet = import ./nix/packages.nix { inherit pkgs; };
       apps = import ./nix/apps.nix {
-        inherit pkgs username;
+        inherit pkgs;
         homeManager = home-manager;
       };
     in
@@ -38,7 +46,7 @@
 
       apps.${system} = apps;
 
-      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
         modules = [

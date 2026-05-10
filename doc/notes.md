@@ -1,7 +1,7 @@
 # Repo Notes
 
 - The repo target is `aarch64-darwin`.
-- The Home Manager user is `shotomorisaki`.
+- The Home Manager configuration target is `homeConfigurations.default`.
 - This repo assumes it lives at `~/Engineering/dotfiles` so that out-of-store
   symlinks for `codex/skills`, `claude/skills`, `fish`, `zsh`, and `git` resolve
   to the live working tree.

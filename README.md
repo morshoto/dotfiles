@@ -14,16 +14,16 @@ This repo now manages:
 
 ```bash
 # Apply this repo to the current user
-nix run .#switch
+nix run --impure .#switch
 
 # Update flake inputs, then re-apply the config
-nix run .#update
+nix run --impure .#update
 
 # Enter the development shell
 nix develop
 
 # Show flake outputs
-nix flake show
+nix flake show --impure
 
 # Compatibility install for profile-based usage
 nix profile add .#morshoto-pkg
@@ -49,9 +49,9 @@ nix profile add .#morshoto-pkg
 
 ## Notes
 
-- The Home Manager target is `shotomorisaki`.
+- The Home Manager target is `homeConfigurations.default`.
 - Skills are linked from this repo using out-of-store symlinks, so edits here apply
-  directly after `nix run .#switch`.
+  directly after `nix run --impure .#switch`.
 - `morshoto-pkg` remains available for `nix profile` compatibility, but
   `home.packages` is the primary source of truth.
 

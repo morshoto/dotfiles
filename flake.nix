@@ -1,5 +1,5 @@
 {
-  description = "CLI tools managed by Nix (aarch64-darwin)";
+  description = "CLI tools managed by Nix";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -52,6 +52,8 @@
         paths = (with pkgs; [
           git
           curl
+          nodejs_22
+          pnpm
 
           google-cloud-sql-proxy
           cocoapods
@@ -109,9 +111,8 @@
         program = toString (pkgs.writeShellScript "update" ''
           set -euo pipefail
           nix flake update
-          nix profile remove my-packages || true
-          nix profile add --profile ~/.nix-profile --priority 50 .#my-packages
-
+          nix profile remove morshoto-pkg || true
+          nix profile add --profile ~/.nix-profile --priority 50 .#morshoto-pkg
         '');
         meta = {
           description = "Update flake.lock and refresh installed nix profile packages";

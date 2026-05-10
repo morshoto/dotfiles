@@ -12,6 +12,7 @@ nix profile add .#morshoto-pkg
 ```
 
 Notes:
+
 - `nix profile install` is a deprecated alias of `add`.
 - You can target a specific profile if needed:
 

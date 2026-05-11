@@ -57,7 +57,7 @@ in
     program = toString (
       pkgs.writeShellScript "switch" ''
         set -euo pipefail
-        exec ${homeManagerBin} switch --flake "${flakeRef}" "$@"
+        exec ${homeManagerBin} switch -b hm-backup --flake "${flakeRef}" "$@"
       ''
     );
     meta.description = "Apply the Home Manager configuration for this repo";

@@ -8,7 +8,9 @@ in
 
   home.file.".codex/AGENTS.md".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/AGENTS.md";
 
-  home.file.".codex/rules".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/rules";
+  # Manage shared rule files inside the existing directory so local-only rules
+  # can coexist without Home Manager needing to replace ~/.codex/rules itself.
+  home.file.".codex/rules/README.md".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/rules/README.md";
 
   home.file.".codex/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/skills";
 

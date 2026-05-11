@@ -9,22 +9,14 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs =
+    { nixpkgs, home-manager, ... }:
     let
-      system = "aarch64-darwin";
-      username = builtins.getEnv "USER";
-      homeDirectory = builtins.getEnv "HOME";
-
-      _ =
-        if username == "" then
-          throw "USER must be set; run flake commands with --impure."
-        else if homeDirectory == "" then
-          throw "HOME must be set; run flake commands with --impure."
-        else
-          null;
+      hostName = "apple-silicon";
+      host = import ./nix/hosts/apple-silicon.nix;
 
       pkgs = import nixpkgs {
-        inherit system;
+        inherit (host) system;
         config = {
           allowUnfreePredicate = pkg: pkg.pname == "terraform";
         };
@@ -34,33 +26,41 @@
       apps = import ./nix/apps.nix {
         inherit pkgs;
         homeManager = home-manager;
-      };
-    in
-    {
-      packages.${system} = {
-        morshoto-pkg = packageSet.packageBundle;
-        default = packageSet.packageBundle;
+        homeConfigurationName = hostName;
       };
 
-      devShells.${system}.default = import ./nix/devshell.nix { inherit pkgs; };
-
-      apps.${system} = apps;
-
-      homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
+      homeConfiguration = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
         modules = [
           ./nix/home/default.nix
           {
-            home.username = username;
-            home.homeDirectory = homeDirectory;
+            home.username = host.username;
+            home.homeDirectory = host.homeDirectory;
             home.stateVersion = "24.11";
           }
         ];
 
         extraSpecialArgs = {
-          inherit username homeDirectory;
+          inherit (host) username homeDirectory dotfilesDir;
         };
+      };
+    in
+    {
+      packages.${host.system} = {
+        morshoto-pkg = packageSet.packageBundle;
+        default = packageSet.packageBundle;
+      };
+
+      devShells.${host.system}.default = import ./nix/devshell.nix { inherit pkgs; };
+
+      formatter.${host.system} = pkgs.nixfmt;
+
+      apps.${host.system} = apps;
+
+      homeConfigurations = {
+        "${hostName}" = homeConfiguration;
+        default = homeConfiguration;
       };
     };
 }

@@ -1,10 +1,11 @@
 # Repo Notes
 
 - The repo target is `aarch64-darwin`.
-- The Home Manager configuration target is `homeConfigurations.default`.
-- This repo assumes it lives at `~/Engineering/dotfiles` so that out-of-store
-  symlinks for `codex/skills`, `claude/skills`, `fish`, `zsh`, and `git` resolve
-  to the live working tree.
+- The primary Home Manager configuration target is `homeConfigurations.apple-silicon`.
+- `homeConfigurations.default` remains as a compatibility alias.
+- This repo reads machine-specific values from `nix/hosts/apple-silicon.nix`.
+- `dotfilesDir` in the host definition is the source of truth for out-of-store
+  symlinks to `codex/skills`, `claude/skills`, `fish`, and `zsh`.
 - `home.packages` is the canonical CLI package list. The `morshoto-pkg` flake
   package is retained as a compatibility bundle for `nix profile` workflows.
 - `nix-darwin` is intentionally not included yet.

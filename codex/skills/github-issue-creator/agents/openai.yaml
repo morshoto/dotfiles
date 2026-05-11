@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Issue Creator"
+  short_description: "Creates **GitHub issue (or issues)** using `gh issue create` based on user-provided requests"
+  default_prompt: "Use $github-issue-finder to scan this repo for issue candidates and create 5-8 GitHub issues."

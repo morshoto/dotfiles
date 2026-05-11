@@ -1,0 +1,8 @@
+interface:
+    display_name: 'Plan GitHub Issue#'
+    short_description: 'Plan work from a GitHub issue number.'
+    default_prompt: 'Use $gh-issue-plan to create a plan from GitHub issue #123.'
+    rand_color: '#3B82F6'
+
+policy:
+    allow_implicit_invocation: false

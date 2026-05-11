@@ -1,0 +1,4 @@
+interface:
+  display_name: "Improve Storybook"
+  short_description: "Upgrade Storybook docs, stories, and tests"
+  default_prompt: "Use $improve-storybook to upgrade Storybook docs, story structure, and addons."

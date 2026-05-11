@@ -12,3 +12,6 @@ enabled = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
+
+[projects."/Users/shotomorisaki/Engineering/kgh"]
+trust_level = "trusted"

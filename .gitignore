@@ -1,6 +1,7 @@
 .DS_Store
 .direnv
 .env
+nix/local.nix
 result
 result-*
 codex/auth.json

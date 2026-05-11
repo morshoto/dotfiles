@@ -18,13 +18,29 @@
       export EDITOR="code --wait"
       export LANG="ja_JP.UTF-8"
 
+      autoload -Uz up-line-or-beginning-search
+      autoload -Uz down-line-or-beginning-search
+      zle -N up-line-or-beginning-search
+      zle -N down-line-or-beginning-search
+      bindkey "^[[A" up-line-or-beginning-search
+      bindkey "^[OA" up-line-or-beginning-search
+      bindkey "^[[B" down-line-or-beginning-search
+      bindkey "^[OB" down-line-or-beginning-search
+
+      if [ -f "$HOME/powerlevel10k/powerlevel10k.zsh-theme" ]; then
+        source "$HOME/powerlevel10k/powerlevel10k.zsh-theme"
+      fi
+
+      if [ -f "$HOME/.p10k.zsh" ]; then
+        source "$HOME/.p10k.zsh"
+      fi
+
       if [ -f "$HOME/.config/zsh/extra.zsh" ]; then
         source "$HOME/.config/zsh/extra.zsh"
       fi
     '';
   };
 
-  programs.starship.enable = true;
   programs.zoxide.enable = true;
   programs.fzf.enable = true;
 }

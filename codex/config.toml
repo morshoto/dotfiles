@@ -24,3 +24,8 @@ trust_level = "trusted"
 
 [projects."/Users/shotomorisaki/Engineering/kaggle-template-pacakge"]
 trust_level = "trusted"
+
+[features]
+goals = true
+memories = true
+codex_git_commit = true

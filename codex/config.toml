@@ -1,4 +1,4 @@
-model = "gpt-5.4"
+model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 personality = "pragmatic"
 approvals_reviewer = "user"
@@ -14,4 +14,13 @@ enabled = true
 "gpt-5.5" = 4
 
 [projects."/Users/shotomorisaki/Engineering/kgh"]
+trust_level = "trusted"
+
+[projects."/Users/shotomorisaki/Engineering/dotfiles"]
+trust_level = "trusted"
+
+[projects."/Users/shotomorisaki/Engineering/nemotron-model-reasoning"]
+trust_level = "trusted"
+
+[projects."/Users/shotomorisaki/Engineering/kaggle-template-pacakge"]
 trust_level = "trusted"

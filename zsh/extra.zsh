@@ -1,6 +1,10 @@
 # Extra zsh settings managed in dotfiles.
 # Keep non-Nix-managed local integrations here.
 
+# Colorize `ls` output on macOS and highlight directories only.
+export CLICOLOR=1
+export LSCOLORS="Exxxxxxxxxxxxxxxxxxxxx"
+
 # pnpm
 export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in

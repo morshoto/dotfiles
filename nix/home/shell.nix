@@ -33,6 +33,10 @@
 
       if [ -f "$HOME/.p10k.zsh" ]; then
         source "$HOME/.p10k.zsh"
+        # typeset -g POWERLEVEL9K_DIR_BACKGROUND=24
+        # typeset -g POWERLEVEL9K_DIR_FOREGROUND=255
+        # typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=153
+        # typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=255
       fi
 
       if [ -f "$HOME/.config/zsh/extra.zsh" ]; then

@@ -13,7 +13,13 @@
     { nixpkgs, home-manager, ... }:
     let
       hostName = "apple-silicon";
-      host = import ./nix/hosts/apple-silicon.nix;
+      hostDefaults = import ./nix/hosts/apple-silicon.nix;
+      local =
+        if builtins.pathExists ./nix/local.nix then
+          import ./nix/local.nix
+        else
+          builtins.throw "Create nix/local.nix from nix/local.example.nix before evaluating this flake.";
+      host = hostDefaults // local;
 
       pkgs = import nixpkgs {
         inherit (host) system;

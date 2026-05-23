@@ -20,12 +20,32 @@
 
       autoload -Uz up-line-or-beginning-search
       autoload -Uz down-line-or-beginning-search
-      zle -N up-line-or-beginning-search
-      zle -N down-line-or-beginning-search
-      bindkey "^[[A" up-line-or-beginning-search
-      bindkey "^[OA" up-line-or-beginning-search
-      bindkey "^[[B" down-line-or-beginning-search
-      bindkey "^[OB" down-line-or-beginning-search
+      case_insensitive_up_line_or_beginning_search() {
+        emulate -L zsh
+        setopt NO_CASE_MATCH
+        up-line-or-beginning-search
+      }
+
+      case_insensitive_down_line_or_beginning_search() {
+        emulate -L zsh
+        setopt NO_CASE_MATCH
+        down-line-or-beginning-search
+      }
+
+      zle -N case_insensitive_up_line_or_beginning_search
+      zle -N case_insensitive_down_line_or_beginning_search
+      bindkey "^[[A" case_insensitive_up_line_or_beginning_search
+      bindkey "^[OA" case_insensitive_up_line_or_beginning_search
+      bindkey "^[[B" case_insensitive_down_line_or_beginning_search
+      bindkey "^[OB" case_insensitive_down_line_or_beginning_search
+
+      # Make shell completion and fzf matching case-insensitive.
+      zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+      if [ -n "$FZF_DEFAULT_OPTS" ]; then
+        export FZF_DEFAULT_OPTS="--case-insensitive $FZF_DEFAULT_OPTS"
+      else
+        export FZF_DEFAULT_OPTS="--case-insensitive"
+      fi
 
       if [ -f "$HOME/powerlevel10k/powerlevel10k.zsh-theme" ]; then
         source "$HOME/powerlevel10k/powerlevel10k.zsh-theme"

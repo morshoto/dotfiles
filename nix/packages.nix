@@ -7,6 +7,8 @@ let
   packageList =
     (with pkgs; [
       git
+      delta
+      git-lfs
       curl
       nodejs_22
       pnpm

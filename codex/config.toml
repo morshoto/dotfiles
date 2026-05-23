@@ -4,28 +4,32 @@ personality = "pragmatic"
 approvals_reviewer = "user"
 
 [features]
+goals = true
 rmcp_client = true
 multi_agent = true
+memories = true
+codex_git_commit = true
 
 [plugins."github@openai-curated"]
 enabled = true
 
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
 [tui.model_availability_nux]
 "gpt-5.5" = 4
-
-[projects."/Users/shotomorisaki/Engineering/kgh"]
-trust_level = "trusted"
-
-[projects."/Users/shotomorisaki/Engineering/dotfiles"]
-trust_level = "trusted"
-
-[projects."/Users/shotomorisaki/Engineering/nemotron-model-reasoning"]
-trust_level = "trusted"
-
-[projects."/Users/shotomorisaki/Engineering/kaggle-template-pacakge"]
-trust_level = "trusted"
-
-[features]
-goals = true
-memories = true
-codex_git_commit = true

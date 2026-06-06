@@ -5,8 +5,9 @@
 }:
 
 let
-  homeManagerBin =
-    "${homeManager.packages.${pkgs.stdenv.hostPlatform.system}.home-manager}/bin/home-manager";
+  homeManagerBin = "${
+    homeManager.packages.${pkgs.stdenv.hostPlatform.system}.home-manager
+  }/bin/home-manager";
   flakeRef = "path:$PWD#${homeConfigurationName}";
 in
 {

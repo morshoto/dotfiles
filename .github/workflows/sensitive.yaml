@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
 
           blocked_files="$(
-            git ls-files | rg -n '(^|/)(\.env($|\.)|.*\.(pem|key|p12|pfx|jks|kdbx)$|codex/auth\.json$|nix/local\.nix$)'
+            git ls-files | grep -En '(^|/)(\.env($|\.)|.*\.(pem|key|p12|pfx|jks|kdbx)$|codex/auth\.json$|nix/local\.nix$)' || true
           )"
 
           if [ -n "${blocked_files}" ]; then
@@ -39,7 +39,7 @@ jobs:
           set -euo pipefail
 
           matched="$(
-            git grep -n -I \
+            git grep -n -I -E \
               -e 'shotomorisaki' \
               -e 'morshoto' \
               -e 'jojoto8845@icloud\.com' \

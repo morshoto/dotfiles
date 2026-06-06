@@ -46,7 +46,7 @@ in
   inherit packageList;
 
   packageBundle = pkgs.buildEnv {
-    name = "morshoto-pkg";
+    name = "dotfiles-pkg";
     pathsToLink = [
       "/bin"
       "/share"

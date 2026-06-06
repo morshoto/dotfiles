@@ -11,13 +11,13 @@ If you are using the compatibility profile bundle instead, verify the package is
 in the bundle closure:
 
 ```sh
-nix path-info -r "path:$PWD#morshoto-pkg" | rg '<package>'
+nix path-info -r "path:$PWD#dotfiles-pkg" | rg '<package>'
 ```
 
 For a package added to the compatibility bundle, reinstall it:
 
 ```sh
-nix profile add "path:$PWD#morshoto-pkg"
+nix profile add "path:$PWD#dotfiles-pkg"
 ```
 
 If a command still resolves to an unexpected binary, reload the shell:

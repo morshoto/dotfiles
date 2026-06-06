@@ -24,5 +24,5 @@ git diff -- flake.lock
 If you still rely on the compatibility profile bundle, refresh it explicitly:
 
 ```sh
-nix profile add "path:$PWD#morshoto-pkg"
+nix profile add "path:$PWD#dotfiles-pkg"
 ```

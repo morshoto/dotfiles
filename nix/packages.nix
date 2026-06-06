@@ -26,6 +26,7 @@ let
       kubectl
       lazygit
       lftp
+      kaggle
       llvmPackages.openmp
       maven
       pandoc

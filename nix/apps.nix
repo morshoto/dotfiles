@@ -15,7 +15,7 @@ in
     program = toString (
       pkgs.writeShellScript "build" ''
         set -euo pipefail
-        exec ${homeManagerBin} build --flake "${flakeRef}" "$@"
+        exec ${homeManagerBin} build --impure --flake "${flakeRef}" "$@"
       ''
     );
     meta.description = "Build the Home Manager configuration for this repo";
@@ -57,7 +57,7 @@ in
     program = toString (
       pkgs.writeShellScript "switch" ''
         set -euo pipefail
-        exec ${homeManagerBin} switch -b hm-backup --flake "${flakeRef}" "$@"
+        exec ${homeManagerBin} switch -b hm-backup --impure --flake "${flakeRef}" "$@"
       ''
     );
     meta.description = "Apply the Home Manager configuration for this repo";

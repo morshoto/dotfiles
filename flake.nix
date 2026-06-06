@@ -13,13 +13,14 @@
     { nixpkgs, home-manager, ... }:
     let
       hostName = "apple-silicon";
-      hostDefaults = import ./nix/hosts/apple-silicon.nix;
-      local =
-        if builtins.pathExists ./nix/local.nix then
-          import ./nix/local.nix
+      host = import ./nix/hosts/apple-silicon.nix;
+      homeDirectory = builtins.getEnv "HOME";
+
+      username =
+        if homeDirectory == "" then
+          builtins.throw "HOME must be set to evaluate this flake"
         else
-          builtins.throw "Create nix/local.nix from nix/local.example.nix before evaluating this flake.";
-      host = hostDefaults // local;
+          builtins.baseNameOf homeDirectory;
 
       pkgs = import nixpkgs {
         inherit (host) system;
@@ -41,14 +42,15 @@
         modules = [
           ./nix/home/default.nix
           {
-            home.username = host.username;
-            home.homeDirectory = host.homeDirectory;
+            home.username = username;
+            home.homeDirectory = homeDirectory;
             home.stateVersion = "24.11";
           }
         ];
 
         extraSpecialArgs = {
-          inherit (host) username homeDirectory dotfilesDir;
+          inherit username homeDirectory;
+          inherit (host) dotfilesDir;
         };
       };
     in

@@ -35,7 +35,7 @@ nix develop "path:$PWD"
 nix flake show "path:$PWD"
 
 # Compatibility install for profile-based usage
-nix profile add "path:$PWD#morshoto-pkg"
+nix profile add "path:$PWD#dotfiles-pkg"
 ```
 
 ## Layout
@@ -67,7 +67,7 @@ nix profile add "path:$PWD#morshoto-pkg"
   working tree instead of the Git snapshot.
 - Skills are linked from this repo using out-of-store symlinks, so edits here apply
   directly after `nix run "path:$PWD#switch"`.
-- `morshoto-pkg` remains available for `nix profile` compatibility, but
+- `dotfiles-pkg` remains available for `nix profile` compatibility, but
   `home.packages` is the primary source of truth.
 
 ## Docs

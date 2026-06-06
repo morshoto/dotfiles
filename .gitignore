@@ -20,3 +20,5 @@ codex/sessions/
 codex/archived_sessions/
 codex/shell_snapshots/
 codex/vendor_imports/
+*.pyc
+__pycache__/

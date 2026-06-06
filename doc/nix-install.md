@@ -24,7 +24,7 @@ This runs Home Manager for the current user and applies:
 If you only want the CLI bundle without the rest of the dotfiles config:
 
 ```sh
-nix profile add "path:$PWD#morshoto-pkg"
+nix profile add "path:$PWD#dotfiles-pkg"
 ```
 
 This compatibility bundle remains available, but `home.packages` is the primary

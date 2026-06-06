@@ -1,5 +1,5 @@
 {
-  description = "morshoto dotfiles";
+  description = "dotfiles";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -13,14 +13,11 @@
     { nixpkgs, home-manager, ... }:
     let
       hostName = "apple-silicon";
-      host = import ./nix/hosts/apple-silicon.nix;
-      homeDirectory = builtins.getEnv "HOME";
-
-      username =
-        if homeDirectory == "" then
-          builtins.throw "HOME must be set to evaluate this flake"
-        else
-          builtins.baseNameOf homeDirectory;
+      hostDefaults = import ./nix/hosts/apple-silicon.nix;
+      local = if builtins.pathExists ./nix/local.nix then import ./nix/local.nix else { };
+      host = hostDefaults // local;
+      username = if host ? username then host.username else "your-username";
+      homeDirectory = if host ? homeDirectory then host.homeDirectory else "/Users/your-username";
 
       pkgs = import nixpkgs {
         inherit (host) system;
@@ -56,7 +53,7 @@
     in
     {
       packages.${host.system} = {
-        morshoto-pkg = packageSet.packageBundle;
+        dotfiles-pkg = packageSet.packageBundle;
         default = packageSet.packageBundle;
       };
 

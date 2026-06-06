@@ -1,0 +1,29 @@
+name: CI: Lint
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Check flake
+        run: nix flake check --all-systems --show-trace "path:$GITHUB_WORKSPACE"
+
+      - name: Check formatting
+        run: nix run "path:$GITHUB_WORKSPACE#fmt" -- --check

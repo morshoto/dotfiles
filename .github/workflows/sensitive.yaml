@@ -1,0 +1,75 @@
+name: Sensitive Info Scan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sensitive-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan tracked filenames
+        run: |
+          set -euo pipefail
+
+          blocked_files="$(
+            git ls-files | rg -n '(^|/)(\.env($|\.)|.*\.(pem|key|p12|pfx|jks|kdbx)$|codex/auth\.json$|nix/local\.nix$)'
+          )"
+
+          if [ -n "${blocked_files}" ]; then
+            printf '%s\n' "${blocked_files}"
+            echo "Found tracked sensitive filenames."
+            exit 1
+          fi
+
+      - name: Scan tracked contents
+        run: |
+          set -euo pipefail
+
+          matched="$(
+            git grep -n -I \
+              -e 'shotomorisaki' \
+              -e 'morshoto' \
+              -e 'jojoto8845@icloud\.com' \
+              -e '/Users/shotomorisaki' \
+              -e 'Shoto Morisaki' \
+              -e 'Morisaki' \
+              -e 'ghp_[A-Za-z0-9]{36}' \
+              -e 'github_pat_[A-Za-z0-9_]{80,}' \
+              -e 'sk-[A-Za-z0-9]{20,}' \
+              -e 'AKIA[0-9A-Z]{16}' \
+              -e 'BEGIN (RSA|OPENSSH|EC|PGP) PRIVATE KEY' \
+              -- . || true
+          )"
+
+          if [ -n "${matched}" ]; then
+            printf '%s\n' "${matched}"
+            echo "Found sensitive content in tracked files."
+            exit 1
+          fi
+
+      - name: Scan commit metadata
+        run: |
+          set -euo pipefail
+
+          history_matches="$(
+            git log HEAD --format='%H %an <%ae> %cn <%ce> %s' | rg -n -I -e 'shotomorisaki' -e 'morshoto' -e 'jojoto8845@icloud\.com' -e '/Users/shotomorisaki' -e 'Shoto Morisaki' -e 'Morisaki' || true
+          )"
+
+          if [ -n "${history_matches}" ]; then
+            printf '%s\n' "${history_matches}"
+            echo "Found sensitive commit metadata."
+            exit 1
+          fi

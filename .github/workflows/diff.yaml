@@ -1,0 +1,72 @@
+name: Nix Diff Check
+
+on:
+  pull_request:
+    paths:
+      - flake.lock
+      - flake.nix
+      - nix/**
+      - codex/**
+      - claude/**
+      - fish/**
+      - git/**
+      - scripts/**
+      - zsh/**
+      - README.md
+      - doc/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  nix-diff:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Summarize Nix changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          changed_files="$(
+            git diff --name-only "${BASE_SHA}" HEAD -- \
+              flake.lock \
+              flake.nix \
+              nix \
+              codex \
+              claude \
+              fish \
+              git \
+              scripts \
+              zsh \
+              README.md \
+              doc
+          )"
+
+          {
+            echo "## Changed Nix-related files"
+            echo
+            if [ -n "${changed_files}" ]; then
+              echo '```text'
+              printf '%s\n' "${changed_files}"
+              echo '```'
+            else
+              echo '_No Nix-related files changed._'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check flake
+        run: nix flake check --all-systems --show-trace "path:$GITHUB_WORKSPACE"

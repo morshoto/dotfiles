@@ -26,4 +26,16 @@ jobs:
         run: nix flake check --all-systems --show-trace "path:$GITHUB_WORKSPACE"
 
       - name: Check formatting
-        run: nix run "path:$GITHUB_WORKSPACE#fmt" -- --check
+        run: |
+          set -euo pipefail
+
+          files=()
+          while IFS= read -r -d "" file; do
+            files+=("$file")
+          done < <(find . -type f -name "*.nix" -print0)
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            exit 0
+          fi
+
+          nix run nixpkgs#nixfmt -- --check "${files[@]}"

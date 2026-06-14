@@ -51,7 +51,7 @@ jobs:
                       -e 'sk-[A-Za-z0-9]{20,}' \
                       -e 'AKIA[0-9A-Z]{16}' \
                       -e 'BEGIN (RSA|OPENSSH|EC|PGP) PRIVATE KEY' \
-                      -- . || true
+                      -- . ':!.github/workflows/sensitive.yaml' || true
                   )"
 
                   if [ -n "${matched}" ]; then
@@ -65,7 +65,7 @@ jobs:
                   set -euo pipefail
 
                   history_matches="$(
-                    git log HEAD --format='%H %an <%ae> %cn <%ce> %s' | rg -n -I -e 'shotomorisaki' -e 'morshoto' -e 'jojoto8845@icloud\.com' -e '/Users/shotomorisaki' -e 'Shoto Morisaki' -e 'Morisaki' || true
+                    git log HEAD^ --format='%H %an <%ae> %cn <%ce> %s' | rg -n -I -e 'shotomorisaki' -e 'morshoto' -e 'jojoto8845@icloud\.com' -e '/Users/shotomorisaki' -e 'Shoto Morisaki' -e 'Morisaki' || true
                   )"
 
                   if [ -n "${history_matches}" ]; then

@@ -36,6 +36,7 @@ pkgs.mkShell {
     postgresql_16
     postgresql_16.dev
     pgConfigShim
+    python311
     swig
   ];
 

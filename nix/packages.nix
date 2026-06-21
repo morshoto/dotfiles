@@ -33,6 +33,7 @@ let
       pdftk
       postgresql_16
       poppler-utils
+      python311
       pyenv
       qpdf
       stripe-cli

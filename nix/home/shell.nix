@@ -10,6 +10,8 @@
       gs = "git status";
       gc = "git commit";
       gp = "git push";
+      python = "python3.11";
+      python3 = "python3.11";
       k = "kubectl";
       tf = "terraform";
     };

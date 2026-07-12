@@ -9,6 +9,7 @@ let
       git
       delta
       git-lfs
+      codex
       curl
       nodejs_22
       pnpm

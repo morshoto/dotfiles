@@ -16,8 +16,22 @@
       hostDefaults = import ./nix/hosts/apple-silicon.nix;
       local = if builtins.pathExists ./nix/local.nix then import ./nix/local.nix else { };
       host = hostDefaults // local;
-      username = if host ? username then host.username else "your-username";
-      homeDirectory = if host ? homeDirectory then host.homeDirectory else "/Users/your-username";
+      username =
+        if host ? username then
+          host.username
+        else
+          let
+            envUser = builtins.getEnv "USER";
+          in
+          if envUser != "" then envUser else throw "Set host.username in nix/local.nix";
+      homeDirectory =
+        if host ? homeDirectory then
+          host.homeDirectory
+        else
+          let
+            envHome = builtins.getEnv "HOME";
+          in
+          if envHome != "" then envHome else throw "Set host.homeDirectory in nix/local.nix";
 
       pkgs = import nixpkgs {
         inherit (host) system;

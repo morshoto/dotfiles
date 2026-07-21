@@ -15,5 +15,6 @@ in
 
   home.file.".codex/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/skills";
 
-  home.file.".config/claude/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/claude/skills";
+  # Codex and Claude Code share the same skill set; codex/skills is the SSOT.
+  home.file.".claude/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/skills";
 }

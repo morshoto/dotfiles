@@ -22,3 +22,14 @@ codex/shell_snapshots/
 codex/vendor_imports/
 *.pyc
 __pycache__/
+
+# work-machine-only skills, never committed
+codex/skills/agent-browser/
+codex/skills/apprunner-expert/
+codex/skills/apprunner-screwdriver/
+codex/skills/apprunner-support/
+codex/skills/github-issue/
+codex/skills/nix-java-springboot-setup/
+codex/skills/pr_create/
+codex/skills/pr_review/
+codex/skills/screwdriver-reader/

@@ -1,4 +1,5 @@
-# Codex Skills
+# Skills (shared by Codex and Claude Code)
 
-Place custom Codex skills here. This directory is symlinked to `~/.codex/skills`
-by Home Manager using an out-of-store link, so edits in this repo apply directly.
+Place custom skills here. Home Manager symlinks both `~/.codex/skills` and
+`~/.claude/skills` to this directory using out-of-store links, so edits in
+this repo apply directly.

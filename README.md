@@ -38,6 +38,14 @@ nix flake show "path:$PWD"
 nix profile add "path:$PWD#dotfiles-pkg"
 ```
 
+## Codex model selection
+
+After applying the Home Manager configuration, choose Astra for a session with:
+
+```bash
+codex -m gpt-6-astra
+```
+
 ## Layout
 
 ```txt

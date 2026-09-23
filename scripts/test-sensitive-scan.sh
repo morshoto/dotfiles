@@ -15,13 +15,13 @@ git -C "$fixture" init -q
 git -C "$fixture" config user.email test@example.invalid
 git -C "$fixture" config user.name test
 
-access_key_prefix='AKIA'
-access_key_suffix='0123456789ABCDEF'
-printf 'AWS_ACCESS_KEY_ID=%s%s\n' "$access_key_prefix" "$access_key_suffix" >"$fixture/config.env"
+variable_prefix='export BUNDLE_ENTERPRISE__CONTRIBSYS__COM='
+secret_first='cafe'
+secret_second='babe:deadbeef'
+printf '%s%s%s\n' "$variable_prefix" "$secret_first" "$secret_second" >"$fixture/config.env"
 
-if gitleaks detect \
+if gitleaks dir \
   --source "$fixture" \
-  --no-git \
   --redact \
   --no-banner \
   --config "$repo_root/.gitleaks.toml"; then

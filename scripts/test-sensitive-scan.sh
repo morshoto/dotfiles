@@ -16,7 +16,7 @@ git -C "$fixture" config user.email test@example.invalid
 git -C "$fixture" config user.name test
 
 access_key_prefix='AKIA'
-access_key_suffix='0123456789ABCD'
+access_key_suffix='0123456789ABCDEF'
 printf 'AWS_ACCESS_KEY_ID=%s%s\n' "$access_key_prefix" "$access_key_suffix" >"$fixture/config.env"
 
 if gitleaks detect \

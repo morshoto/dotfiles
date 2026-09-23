@@ -13,8 +13,8 @@ in
   home.file.".codex/rules/README.md".source =
     mkOutOfStoreSymlink "${dotfilesDir}/codex/rules/README.md";
 
-  home.file.".codex/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/skills";
+  home.file.".codex/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/ai/skills";
 
-  # Codex and Claude Code share the same skill set; codex/skills is the SSOT.
-  home.file.".claude/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/skills";
+  # Codex and Claude Code share the same skill set from ai/skills.
+  home.file.".claude/skills".source = mkOutOfStoreSymlink "${dotfilesDir}/ai/skills";
 }

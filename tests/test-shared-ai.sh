@@ -23,7 +23,8 @@ grep -Fq '"${dotfilesDir}/ai/skills"' "$repo_root/nix/home/ai.nix" \
 [[ -f "$repo_root/codex/rules/README.md" ]] || fail "Codex-specific rules remain"
 [[ -f "$repo_root/ai/README.md" ]] || fail "shared AI layout is documented"
 
-if git -C "$repo_root" ls-files --error-unmatch codex/config.toml >/dev/null 2>&1; then
+if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+  && git -C "$repo_root" ls-files --error-unmatch codex/config.toml >/dev/null 2>&1; then
   fail "Codex auth configuration is not tracked"
 fi
 

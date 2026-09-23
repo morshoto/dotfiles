@@ -18,6 +18,9 @@ grep -Fq 'nix flake check --all-systems' "$workflow" || fail "workflow runs flak
 grep -Fq '#build' "$workflow" || fail "workflow builds Home Manager"
 grep -Fq 'peter-evans/create-pull-request@v7' "$workflow" || fail "workflow opens update PRs"
 grep -Fq 'add-paths: flake.lock' "$workflow" || fail "workflow limits PR changes to flake.lock"
+grep -Fq 'id: lockfile' "$workflow" || fail "workflow records lockfile changes"
+grep -Fq 'steps.lockfile.outputs.changed == '\''true'\''' "$workflow" \
+  || fail "workflow creates PRs only for lockfile changes"
 if grep -Fq '#switch' "$workflow" || grep -Fq 'home-manager switch' "$workflow"; then
   fail "workflow never switches the CI environment"
 fi

@@ -19,5 +19,6 @@ grep -Fq 'generic-darwin' <<<"$darwin_hosts" || fail "generic Darwin Darwin outp
 
 grep -Fq 'home-manager.darwinModules.home-manager' "$repo_root/flake.nix" \
   || fail "Darwin configuration integrates Home Manager"
+grep -Fq 'darwin-switch' "$repo_root/nix/apps.nix" || fail "Darwin switch app exists"
 
 printf 'ok: Darwin configuration tests\n'

@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/bootstrap [--dry-run]
+
+Environment overrides:
+  DOTFILES_REPO_DIR       Repository location.
+  DOTFILES_REPO_URL       Clone URL when the repository is absent.
+  DOTFILES_HOST           Host name for a new local configuration.
+  DOTFILES_USERNAME       macOS username for a new local configuration.
+  DOTFILES_HOME           Home directory for a new local configuration.
+EOF
+}
+
+die() {
+  printf 'bootstrap: %s\n' "$1" >&2
+  exit 1
+}
+
+dry_run=0
+case "${1:-}" in
+  "") ;;
+  --dry-run) dry_run=1 ;;
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if [[ "${DOTFILES_BOOTSTRAP_SKIP_PLATFORM_CHECK:-0}" != 1 ]]; then
+  [[ "$(uname -s)" == "Darwin" ]] || die "this bootstrap targets macOS"
+  [[ "$(uname -m)" == "arm64" ]] || die "this bootstrap targets Apple Silicon (arm64)"
+fi
+
+command -v git >/dev/null 2>&1 || die "git is required; install Xcode Command Line Tools first"
+if ! command -v nix >/dev/null 2>&1; then
+  cat >&2 <<'EOF'
+bootstrap: Nix is required.
+Install it with the official Determinate installer, then run bootstrap again:
+  curl --proto '=https' --tlsv1.2 -L https://install.determinate.systems/nix | sh -s -- install
+EOF
+  exit 1
+fi
+
+script_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo_dir="${DOTFILES_REPO_DIR:-}"
+if [[ -z "$repo_dir" && -f "$script_root/flake.nix" ]]; then
+  repo_dir="$script_root"
+fi
+repo_dir="${repo_dir:-${DOTFILES_DIR:-$HOME/Engineering/dotfiles}}"
+repo_url="${DOTFILES_REPO_URL:-https://github.com/morshoto/dotfiles.git}"
+
+if [[ ! -f "$repo_dir/flake.nix" ]]; then
+  if [[ -e "$repo_dir" ]]; then
+    [[ -d "$repo_dir/.git" || -f "$repo_dir/.git" ]] \
+      || die "repository directory exists but is not a Git checkout: $repo_dir"
+  else
+    mkdir -p "$(dirname "$repo_dir")"
+    printf 'Cloning %s into %s\n' "$repo_url" "$repo_dir"
+    git clone "$repo_url" "$repo_dir"
+  fi
+fi
+
+[[ -f "$repo_dir/flake.nix" ]] || die "could not locate flake.nix in $repo_dir"
+[[ -f "$repo_dir/nix/local.example.nix" ]] || die "missing nix/local.example.nix"
+
+local_file="$repo_dir/nix/local.nix"
+if [[ ! -f "$local_file" ]]; then
+  host_name="${DOTFILES_HOST:-apple-silicon}"
+  username="${DOTFILES_USERNAME:-$(id -un)}"
+  home_directory="${DOTFILES_HOME:-$HOME}"
+
+  [[ "$host_name" =~ ^[A-Za-z0-9-]+$ ]] || die "invalid DOTFILES_HOST"
+  [[ "$username" =~ ^[A-Za-z0-9._-]+$ ]] || die "invalid DOTFILES_USERNAME"
+  [[ "$home_directory" != *'"'* && "$home_directory" != *'\\'* && "$home_directory" != *'${'* ]] \
+    || die "DOTFILES_HOME contains characters unsafe for Nix"
+  [[ "$repo_dir" != *'"'* && "$repo_dir" != *'\\'* && "$repo_dir" != *'${'* ]] \
+    || die "repository path contains characters unsafe for Nix"
+
+  local_tmp="$(mktemp "$repo_dir/nix/local.nix.XXXXXX")"
+  awk \
+    -v host_name="$host_name" \
+    -v username="$username" \
+    -v home_directory="$home_directory" \
+    -v dotfiles_dir="$repo_dir" '
+      /hostName[[:space:]]*=/ {
+        printf "  hostName = \"%s\";\n", host_name
+        next
+      }
+      /username[[:space:]]*=/ {
+        printf "  username = \"%s\";\n", username
+        next
+      }
+      /homeDirectory[[:space:]]*=/ {
+        printf "  homeDirectory = \"%s\";\n", home_directory
+        next
+      }
+      /dotfilesDir[[:space:]]*=/ {
+        printf "  dotfilesDir = \"%s\";\n", dotfiles_dir
+        next
+      }
+      { print }
+    ' "$repo_dir/nix/local.example.nix" >"$local_tmp"
+  chmod 600 "$local_tmp"
+  mv "$local_tmp" "$local_file"
+  printf 'Created local machine configuration at %s\n' "$local_file"
+fi
+
+if (( dry_run )); then
+  printf 'Dry run: nix run path:%s#switch\n' "$repo_dir"
+else
+  exec nix run "path:$repo_dir#switch"
+fi

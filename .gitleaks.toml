@@ -1,0 +1,11 @@
+title = "dotfiles secret scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Example configuration and temporary test fixture generator only."
+paths = [
+  '''^nix/local\.example\.nix$''',
+  '''^scripts/test-sensitive-scan\.sh$''',
+]

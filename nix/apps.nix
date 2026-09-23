@@ -1,13 +1,14 @@
 {
   pkgs,
   homeManager,
+  nixDarwin,
   homeConfigurationName,
 }:
 
 let
-  homeManagerBin = "${
-    homeManager.packages.${pkgs.stdenv.hostPlatform.system}.home-manager
-  }/bin/home-manager";
+  system = pkgs.stdenv.hostPlatform.system;
+  homeManagerBin = "${homeManager.packages.${system}.home-manager}/bin/home-manager";
+  darwinRebuildBin = "${nixDarwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild";
   flakeRef = "path:$PWD#${homeConfigurationName}";
 in
 {
@@ -62,6 +63,17 @@ in
       ''
     );
     meta.description = "Apply the Home Manager configuration for this repo";
+  };
+
+  darwin-switch = {
+    type = "app";
+    program = toString (
+      pkgs.writeShellScript "darwin-switch" ''
+        set -euo pipefail
+        exec sudo ${darwinRebuildBin} switch --flake "path:$PWD#${homeConfigurationName}" "$@"
+      ''
+    );
+    meta.description = "Apply the nix-darwin and Home Manager configuration";
   };
 
   update = {

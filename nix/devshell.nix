@@ -30,6 +30,7 @@ in
 pkgs.mkShell {
   packages = with pkgs; [
     cmake
+    gitleaks
     libpq
     llvm
     pkg-config

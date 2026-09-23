@@ -16,6 +16,12 @@ This repo now manages:
 # Apply this repo to the current user
 nix run "path:$PWD#switch"
 
+# Bootstrap a fresh Apple Silicon Mac
+./scripts/bootstrap
+
+# Apply macOS system settings and Home Manager
+nix run "path:$PWD#darwin-switch"
+
 # Build the Home Manager config without switching
 nix run "path:$PWD#build"
 
@@ -67,10 +73,11 @@ codex -m gpt-6-astra
 
 ## Notes
 
-- The primary Home Manager target is `homeConfigurations.apple-silicon`.
-- `homeConfigurations.default` is kept as a temporary alias for compatibility.
+- Home Manager exposes `apple-silicon` and `generic-darwin` host targets.
+- `homeConfigurations.default` follows the host selected in `nix/local.nix`.
+- nix-darwin exposes the same host names under `darwinConfigurations`.
 - Machine-specific values live in the tracked host definition at
-  `nix/hosts/apple-silicon.nix`.
+  `nix/hosts/<name>.nix`, with local overrides in ignored `nix/local.nix`.
 - Flake commands use `path:$PWD` from the repo root so Nix evaluates the live
   working tree instead of the Git snapshot.
 - Skills are linked from this repo using out-of-store symlinks, so edits here apply

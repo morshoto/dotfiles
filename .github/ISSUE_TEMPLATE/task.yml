@@ -1,0 +1,70 @@
+name: Task
+description: Track an improvement, maintenance task, or repository change.
+title: ""
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area does this task belong to?
+      options:
+        - Nix / Home Manager
+        - CI / GitHub Actions
+        - Security
+        - Shell / CLI tooling
+        - AI tooling
+        - Documentation
+        - Maintenance
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the change you want to make.
+      placeholder: What should change?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain why this change is useful or what problem it solves.
+      placeholder: Why is this needed?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List the files, components, or behavior expected to change.
+      placeholder: |
+        - Update ...
+        - Add ...
+        - Remove ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define the conditions for considering this task complete.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Add implementation ideas, references, or anything else that may help.
+    validations:
+      required: false

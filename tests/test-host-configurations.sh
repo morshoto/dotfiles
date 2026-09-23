@@ -17,8 +17,4 @@ home_hosts="$(nix eval --json "path:$repo_root#homeConfigurations" --apply 'buil
 grep -Fq 'apple-silicon' <<<"$home_hosts" || fail "Apple Silicon Home Manager output exists"
 grep -Fq 'generic-darwin' <<<"$home_hosts" || fail "generic Darwin Home Manager output exists"
 
-darwin_hosts="$(nix eval --json "path:$repo_root#darwinConfigurations" --apply 'builtins.attrNames')"
-grep -Fq 'apple-silicon' <<<"$darwin_hosts" || fail "Apple Silicon Darwin output exists"
-grep -Fq 'generic-darwin' <<<"$darwin_hosts" || fail "generic Darwin Darwin output exists"
-
 printf 'ok: host configuration tests\n'

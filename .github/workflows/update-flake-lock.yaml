@@ -35,7 +35,17 @@ jobs:
       - name: Build Home Manager configuration
         run: nix run "path:$GITHUB_WORKSPACE#build" -- --show-trace
 
+      - name: Check for lockfile changes
+        id: lockfile
+        run: |
+          if git diff --quiet -- flake.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create or update pull request
+        if: steps.lockfile.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

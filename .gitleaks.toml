@@ -4,7 +4,8 @@ title = "dotfiles secret scanning"
 useDefault = true
 
 [allowlist]
-description = "The example local configuration contains placeholders only."
+description = "Example configuration and temporary test fixture generator only."
 paths = [
   '''^nix/local\.example\.nix$''',
+  '''^scripts/test-sensitive-scan\.sh$''',
 ]

@@ -7,10 +7,14 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { nixpkgs, home-manager, ... }:
+    { nixpkgs, home-manager, nix-darwin, ... }:
     let
       lib = nixpkgs.lib;
       hostDefinitions = import ./nix/hosts;
@@ -37,30 +41,48 @@
           };
         };
 
+      mkHomeModule = host: {
+        imports = [ ./nix/home/default.nix ];
+        home.username = host.username;
+        home.homeDirectory = host.homeDirectory;
+        home.stateVersion = "24.11";
+      };
+
+      mkHomeSpecialArgs = host: {
+        username = host.username;
+        homeDirectory = host.homeDirectory;
+        dotfilesDir = host.dotfilesDir;
+      };
+
       mkHomeConfiguration = _name: host:
-        let
-          pkgs = mkPkgs host;
-        in
         home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-
-          modules = [
-            ./nix/home/default.nix
-            {
-              home.username = host.username;
-              home.homeDirectory = host.homeDirectory;
-              home.stateVersion = "24.11";
-            }
-          ];
-
-          extraSpecialArgs = {
-            username = host.username;
-            homeDirectory = host.homeDirectory;
-            dotfilesDir = host.dotfilesDir;
-          };
+          pkgs = mkPkgs host;
+          modules = [ (mkHomeModule host) ];
+          extraSpecialArgs = mkHomeSpecialArgs host;
         };
 
       homeConfigurations = lib.mapAttrs mkHomeConfiguration hosts;
+      darwinConfigurations = lib.mapAttrs (
+        _name: host:
+          nix-darwin.lib.darwinSystem {
+            inherit (host) system;
+            modules = [
+              ./nix/darwin/default.nix
+              home-manager.darwinModules.home-manager
+              {
+                system.primaryUser = host.username;
+                users.users.${host.username}.home = host.homeDirectory;
+
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  extraSpecialArgs = mkHomeSpecialArgs host;
+                  users.${host.username} = mkHomeModule host;
+                };
+              }
+            ];
+          }
+      ) hosts;
       primaryHost = hosts.${hostName};
       primaryPkgs = mkPkgs primaryHost;
       packageSet = import ./nix/packages.nix { pkgs = primaryPkgs; };
@@ -86,5 +108,7 @@
       homeConfigurations = homeConfigurations // {
         default = homeConfigurations.${hostName};
       };
+
+      inherit darwinConfigurations;
     };
 }

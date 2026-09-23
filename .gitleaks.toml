@@ -1,0 +1,10 @@
+title = "dotfiles secret scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "The example local configuration contains placeholders only."
+paths = [
+  '''^nix/local\.example\.nix$''',
+]

@@ -30,7 +30,7 @@ mkdir -p "$fixture/nix"
 git -C "$fixture" init -q
 touch "$fixture/.env"
 touch "$fixture/nix/local.nix"
-git -C "$fixture" add .env nix/local.nix
+git -C "$fixture" add -f .env nix/local.nix
 
 if (
   cd "$fixture"

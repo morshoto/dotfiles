@@ -24,6 +24,12 @@ for workflow in build lint diff; do
     || fail "$workflow workflow delegates validation to flake checks"
 done
 
+for workflow in build lint diff; do
+  workflow_file="$repo_root/.github/workflows/$workflow.yaml"
+  grep -Fq 'runs-on: macos-15' "$workflow_file" \
+    || fail "$workflow workflow uses a compatible macOS runner"
+done
+
 if grep -Fq 'nix run nixpkgs#nixfmt' "$repo_root/.github/workflows/lint.yaml"; then
   fail "lint workflow does not duplicate Nix formatting logic"
 fi

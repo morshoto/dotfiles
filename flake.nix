@@ -89,6 +89,7 @@
       apps = import ./nix/apps.nix {
         pkgs = primaryPkgs;
         homeManager = home-manager;
+        nixDarwin = nix-darwin;
         homeConfigurationName = hostName;
       };
     in

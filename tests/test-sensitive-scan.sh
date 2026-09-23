@@ -13,6 +13,8 @@ fail() {
 [[ -x "$scan_script" ]] || fail "filename scanner is executable"
 grep -Fq 'gitleaks/gitleaks-action' "$repo_root/.github/workflows/sensitive.yaml" \
   || fail "workflow uses a generic secret scanner"
+grep -Fq 'fetch-depth: 0' "$repo_root/.github/workflows/sensitive.yaml" \
+  || fail "workflow fetches history for range scanning"
 grep -Fq 'scripts/check-sensitive-files.sh' "$repo_root/.github/workflows/sensitive.yaml" \
   || fail "workflow checks blocked filenames"
 

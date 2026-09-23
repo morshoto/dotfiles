@@ -17,4 +17,19 @@ grep -Fq 'nix/hosts/<name>.nix' "$repo_root/doc/nix-install.md" \
 grep -Fq 'nix/local.nix' "$repo_root/doc/nix-install.md" \
   || fail "install docs explain local configuration"
 
+layout="$(sed -n '/^## Layout$/,/^## Notes$/p' "$repo_root/README.md")"
+for entry in ai codex doc fish git ghostty nix scripts tests zsh; do
+  grep -Fq "├── $entry/" <<<"$layout" \
+    || fail "README layout includes $entry"
+done
+
+if grep -Fq 'claude/skills/' <<<"$layout" || grep -Fq 'codex/skills/' <<<"$layout"; then
+  fail "README layout does not list stale skill directories"
+fi
+
+grep -Fq 'ai/skills' "$repo_root/README.md" \
+  || fail "README explains the shared skill source"
+grep -Fq '~/.claude/skills' "$repo_root/README.md" \
+  || fail "README explains the Claude skill link"
+
 printf 'ok: documentation tests\n'

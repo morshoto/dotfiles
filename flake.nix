@@ -14,7 +14,12 @@
   };
 
   outputs =
-    { nixpkgs, home-manager, nix-darwin, ... }:
+    {
+      nixpkgs,
+      home-manager,
+      nix-darwin,
+      ...
+    }:
     let
       lib = nixpkgs.lib;
       hostDefinitions = import ./nix/hosts;
@@ -29,11 +34,11 @@
 
       localOverrides = builtins.removeAttrs local [ "hostName" ];
       hosts = lib.mapAttrs (
-        name: definition:
-          if name == hostName then definition // localOverrides else definition
+        name: definition: if name == hostName then definition // localOverrides else definition
       ) hostDefinitions;
 
-      mkPkgs = host:
+      mkPkgs =
+        host:
         import nixpkgs {
           inherit (host) system;
           config = {
@@ -54,7 +59,8 @@
         dotfilesDir = host.dotfilesDir;
       };
 
-      mkHomeConfiguration = _name: host:
+      mkHomeConfiguration =
+        _name: host:
         home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs host;
           modules = [ (mkHomeModule host) ];
@@ -64,24 +70,24 @@
       homeConfigurations = lib.mapAttrs mkHomeConfiguration hosts;
       darwinConfigurations = lib.mapAttrs (
         _name: host:
-          nix-darwin.lib.darwinSystem {
-            inherit (host) system;
-            modules = [
-              ./nix/darwin/default.nix
-              home-manager.darwinModules.home-manager
-              {
-                system.primaryUser = host.username;
-                users.users.${host.username}.home = host.homeDirectory;
+        nix-darwin.lib.darwinSystem {
+          inherit (host) system;
+          modules = [
+            ./nix/darwin/default.nix
+            home-manager.darwinModules.home-manager
+            {
+              system.primaryUser = host.username;
+              users.users.${host.username}.home = host.homeDirectory;
 
-                home-manager = {
-                  useGlobalPkgs = true;
-                  useUserPackages = true;
-                  extraSpecialArgs = mkHomeSpecialArgs host;
-                  users.${host.username} = mkHomeModule host;
-                };
-              }
-            ];
-          }
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = mkHomeSpecialArgs host;
+                users.${host.username} = mkHomeModule host;
+              };
+            }
+          ];
+        }
       ) hosts;
       primaryHost = hosts.${hostName};
       primaryPkgs = mkPkgs primaryHost;

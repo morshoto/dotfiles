@@ -7,9 +7,7 @@
 
 let
   system = pkgs.stdenv.hostPlatform.system;
-  homeManagerBin = "${
-    homeManager.packages.${system}.home-manager
-  }/bin/home-manager";
+  homeManagerBin = "${homeManager.packages.${system}.home-manager}/bin/home-manager";
   darwinRebuildBin = "${nixDarwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild";
   flakeRef = "path:$PWD#${homeConfigurationName}";
 in

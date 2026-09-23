@@ -31,7 +31,7 @@ This runs Home Manager for the current user and applies:
 
 - CLI packages from `home.packages`
 - Git and shell settings
-- repo-backed symlinks for Codex and Claude skills
+- repo-backed symlinks for the shared Codex and Claude skills
 
 ## Apply macOS system configuration
 

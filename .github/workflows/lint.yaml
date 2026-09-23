@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout repository
@@ -22,20 +22,5 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31
 
-      - name: Check flake
+      - name: Run flake checks
         run: nix flake check --all-systems --show-trace "path:$GITHUB_WORKSPACE"
-
-      - name: Check formatting
-        run: |
-          set -euo pipefail
-
-          files=()
-          while IFS= read -r -d "" file; do
-            files+=("$file")
-          done < <(find . -type f -name "*.nix" -print0)
-
-          if [ "${#files[@]}" -eq 0 ]; then
-            exit 0
-          fi
-
-          nix run nixpkgs#nixfmt -- --check "${files[@]}"

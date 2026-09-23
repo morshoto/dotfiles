@@ -28,8 +28,8 @@ nix run "path:$PWD#build"
 # Update flake inputs, then re-apply the config
 nix run "path:$PWD#update"
 
-# Run flake checks
-nix run "path:$PWD#check"
+# Run all flake checks locally
+nix flake check --all-systems "path:$PWD"
 
 # Format Nix files
 nix run "path:$PWD#fmt"
@@ -56,19 +56,20 @@ codex -m gpt-6-astra
 
 ```txt
 .
-├── flake.nix
-├── nix/
-│   ├── apps.nix
-│   ├── devshell.nix
-│   ├── hosts/
-│   ├── packages.nix
-│   └── home/
-├── codex/skills/
-├── claude/skills/
+├── .github/
+├── ai/
+│   └── skills/
+├── codex/
+│   └── rules/
+├── doc/
 ├── fish/
-├── zsh/
+├── ghostty/
 ├── git/
-└── scripts/
+├── nix/
+├── scripts/
+├── tests/
+├── zsh/
+└── flake.nix
 ```
 
 ## Notes
@@ -80,8 +81,11 @@ codex -m gpt-6-astra
   `nix/hosts/<name>.nix`, with local overrides in ignored `nix/local.nix`.
 - Flake commands use `path:$PWD` from the repo root so Nix evaluates the live
   working tree instead of the Git snapshot.
-- Skills are linked from this repo using out-of-store symlinks, so edits here apply
-  directly after `nix run "path:$PWD#switch"`.
+- Shared skills live in `ai/skills` and are linked to both `~/.codex/skills` and
+  `~/.claude/skills` using out-of-store symlinks, so edits here apply directly
+  after `nix run "path:$PWD#switch"`.
+- Codex-specific instructions and rules remain under `codex/`; private
+  authentication and session data stay outside the repository.
 - `dotfiles-pkg` remains available for `nix profile` compatibility, but
   `home.packages` is the primary source of truth.
 

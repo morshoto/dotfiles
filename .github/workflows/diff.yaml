@@ -7,10 +7,12 @@ on:
       - flake.nix
       - nix/**
       - codex/**
-      - claude/**
+      - ai/**
+      - ghostty/**
       - fish/**
       - git/**
       - scripts/**
+      - tests/**
       - zsh/**
       - README.md
       - doc/**
@@ -47,10 +49,12 @@ jobs:
               flake.nix \
               nix \
               codex \
-              claude \
+              ai \
+              ghostty \
               fish \
               git \
               scripts \
+              tests \
               zsh \
               README.md \
               doc

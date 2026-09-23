@@ -21,7 +21,7 @@ secret_second='babe:deadbeef'
 printf '%s%s%s\n' "$variable_prefix" "$secret_first" "$secret_second" >"$fixture/config.env"
 
 if gitleaks dir \
-  --source "$fixture" \
+  "$fixture" \
   --redact \
   --no-banner \
   --config "$repo_root/.gitleaks.toml"; then

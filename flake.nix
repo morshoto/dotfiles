@@ -12,74 +12,79 @@
   outputs =
     { nixpkgs, home-manager, ... }:
     let
-      hostName = "apple-silicon";
-      hostDefaults = import ./nix/hosts/apple-silicon.nix;
+      lib = nixpkgs.lib;
+      hostDefinitions = import ./nix/hosts;
       local = if builtins.pathExists ./nix/local.nix then import ./nix/local.nix else { };
-      host = hostDefaults // local;
-      username =
-        if host ? username then
-          host.username
-        else
-          let
-            envUser = builtins.getEnv "USER";
-          in
-          if envUser != "" then envUser else throw "Set host.username in nix/local.nix";
-      homeDirectory =
-        if host ? homeDirectory then
-          host.homeDirectory
-        else
-          let
-            envHome = builtins.getEnv "HOME";
-          in
-          if envHome != "" then envHome else throw "Set host.homeDirectory in nix/local.nix";
+      hostName = local.hostName or "apple-silicon";
 
-      pkgs = import nixpkgs {
-        inherit (host) system;
-        config = {
-          allowUnfreePredicate = pkg: pkg.pname == "terraform";
+      _validateHost =
+        if builtins.hasAttr hostName hostDefinitions then
+          null
+        else
+          throw "Unknown host '${hostName}'. Choose one of: ${builtins.concatStringsSep ", " (builtins.attrNames hostDefinitions)}";
+
+      localOverrides = builtins.removeAttrs local [ "hostName" ];
+      hosts = lib.mapAttrs (
+        name: definition:
+          if name == hostName then definition // localOverrides else definition
+      ) hostDefinitions;
+
+      mkPkgs = host:
+        import nixpkgs {
+          inherit (host) system;
+          config = {
+            allowUnfreePredicate = pkg: pkg.pname == "terraform";
+          };
         };
-      };
 
-      packageSet = import ./nix/packages.nix { inherit pkgs; };
+      mkHomeConfiguration = _name: host:
+        let
+          pkgs = mkPkgs host;
+        in
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+
+          modules = [
+            ./nix/home/default.nix
+            {
+              home.username = host.username;
+              home.homeDirectory = host.homeDirectory;
+              home.stateVersion = "24.11";
+            }
+          ];
+
+          extraSpecialArgs = {
+            username = host.username;
+            homeDirectory = host.homeDirectory;
+            dotfilesDir = host.dotfilesDir;
+          };
+        };
+
+      homeConfigurations = lib.mapAttrs mkHomeConfiguration hosts;
+      primaryHost = hosts.${hostName};
+      primaryPkgs = mkPkgs primaryHost;
+      packageSet = import ./nix/packages.nix { pkgs = primaryPkgs; };
       apps = import ./nix/apps.nix {
-        inherit pkgs;
+        pkgs = primaryPkgs;
         homeManager = home-manager;
         homeConfigurationName = hostName;
       };
-
-      homeConfiguration = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-
-        modules = [
-          ./nix/home/default.nix
-          {
-            home.username = username;
-            home.homeDirectory = homeDirectory;
-            home.stateVersion = "24.11";
-          }
-        ];
-
-        extraSpecialArgs = {
-          inherit username homeDirectory;
-          inherit (host) dotfilesDir;
-        };
-      };
     in
+    assert _validateHost == null;
     {
-      packages.${host.system} = {
+      packages.${primaryHost.system} = {
         dotfiles-pkg = packageSet.packageBundle;
         default = packageSet.packageBundle;
       };
 
-      devShells.${host.system}.default = import ./nix/devshell.nix { inherit pkgs; };
+      devShells.${primaryHost.system}.default = import ./nix/devshell.nix { pkgs = primaryPkgs; };
 
-      formatter.${host.system} = pkgs.nixfmt;
+      formatter.${primaryHost.system} = primaryPkgs.nixfmt;
 
-      apps.${host.system} = apps;
+      apps.${primaryHost.system} = apps;
 
-      homeConfigurations = {
-        "${hostName}" = homeConfiguration;
-        default = homeConfiguration;
+      homeConfigurations = homeConfigurations // {
+        default = homeConfigurations.${hostName};
       };
     };
 }

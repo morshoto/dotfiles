@@ -1,4 +1,5 @@
 {
+  hostName = "apple-silicon";
   system = "aarch64-darwin";
   username = "your-username";
   homeDirectory = "/Users/your-username";

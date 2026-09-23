@@ -1,6 +1,6 @@
 name: Task
 description: Track an improvement, maintenance task, or repository change.
-title: ""
+title: "[Task] "
 body:
   - type: dropdown
     id: category

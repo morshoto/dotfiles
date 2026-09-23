@@ -23,5 +23,5 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31
 
-      - name: Build Home Manager configuration
-        run: nix run "path:$GITHUB_WORKSPACE#build" -- --show-trace
+      - name: Run flake checks
+        run: nix flake check --all-systems --show-trace "path:$GITHUB_WORKSPACE"

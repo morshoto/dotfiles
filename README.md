@@ -74,9 +74,10 @@ codex -m gpt-6-astra
 
 ## Notes
 
-- Home Manager exposes `apple-silicon` and `generic-darwin` host targets.
-- `homeConfigurations.default` follows the host selected in `nix/local.nix`.
-- nix-darwin exposes the same host names under `darwinConfigurations`.
+- Home Manager and nix-darwin expose the single tracked host
+  `apple-silicon` (`aarch64-darwin`).
+- `homeConfigurations.default` follows the host selected in `nix/local.nix`,
+  which defaults to `apple-silicon`.
 - Machine-specific values live in the tracked host definition at
   `nix/hosts/<name>.nix`, with local overrides in ignored `nix/local.nix`.
 - Flake commands use `path:$PWD` from the repo root so Nix evaluates the live

@@ -14,10 +14,16 @@ entry point from a checkout (or from a copied `scripts/bootstrap`):
 
 The script locates or clones the repository, creates the ignored
 `nix/local.nix` from `nix/local.example.nix` when needed, and applies the
-Home Manager configuration. It never stores credentials. Set
-`DOTFILES_REPO_DIR`, `DOTFILES_REPO_URL`, `DOTFILES_HOST`, `DOTFILES_USERNAME`,
-or `DOTFILES_HOME` to override its defaults. Use `--dry-run` to inspect the
+Home Manager configuration. It never stores credentials. The only tracked
+macOS host is `apple-silicon` (`aarch64-darwin`), which bootstrap selects by
+default. `DOTFILES_HOST` must name a registered host; unknown names are
+rejected. Set `DOTFILES_REPO_DIR`, `DOTFILES_REPO_URL`, `DOTFILES_USERNAME`, or
+`DOTFILES_HOME` to override their defaults. Use `--dry-run` to inspect the
 final apply command without running it.
+
+The ignored `nix/local.nix` stores machine-specific values such as `hostName`,
+`username`, `homeDirectory`, and `dotfilesDir`. The flake applies these values
+over the tracked host defaults. Bootstrap preserves an existing local file.
 
 ## Apply the configuration
 

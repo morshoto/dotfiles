@@ -41,16 +41,31 @@ nix eval --raw --expr '
     ];
     actualTopLevel = builtins.sort builtins.lessThan (builtins.attrNames config);
     actualFeatures = builtins.sort builtins.lessThan (builtins.attrNames config.features);
+    collectStrings = value:
+      if builtins.isAttrs value then
+        builtins.concatLists (builtins.map collectStrings (builtins.attrValues value))
+      else if builtins.isList value then
+        builtins.concatLists (builtins.map collectStrings value)
+      else if builtins.isString value then
+        [ value ]
+      else
+        [ ];
+    hasHostPath = builtins.any
+      (value: builtins.match ".*(/Users/|/home/|/nix/store/).*" value != null
+        || builtins.match "^~/.*" value != null)
+      (collectStrings config);
   in
     if actualTopLevel != expectedTopLevel then
       throw "portable profile must contain only reviewed portable settings"
     else if actualFeatures != expectedFeatures then
       throw "portable profile feature flags must match the reviewed allowlist"
+    else if hasHostPath then
+      throw "portable profile must not contain machine paths"
     else
       "ok"
 ' >/dev/null || fail "portable profile parses and has only portable keys"
 
-grep -Fq 'config.toml' "$repo_root/codex/.gitignore" \
+git -C "$repo_root" check-ignore -q codex/config.toml \
   || fail "the machine-local Codex config remains ignored"
 grep -Fq '".codex/config.toml"' "$repo_root/nix/home/ai.nix" \
   || fail "Home Manager keeps the machine-local config link"

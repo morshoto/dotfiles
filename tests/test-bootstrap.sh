@@ -15,9 +15,15 @@ fail() {
 fixture="$(mktemp -d)"
 fake_bin="$(mktemp -d)"
 trap 'rm -rf "$fixture" "$fake_bin"' EXIT
-mkdir -p "$fixture/nix"
+mkdir -p "$fixture/nix/hosts"
 git -C "$fixture" init -q
 touch "$fixture/flake.nix"
+touch "$fixture/nix/hosts/apple-silicon.nix"
+cat >"$fixture/nix/hosts/default.nix" <<'EOF'
+{
+  apple-silicon = import ./apple-silicon.nix;
+}
+EOF
 cat >"$fixture/nix/local.example.nix" <<'EOF'
 {
   hostName = "apple-silicon";
@@ -51,6 +57,7 @@ run_bootstrap
 grep -Fq 'username = "tester"' "$fixture/nix/local.nix" || fail "bootstrap initializes username"
 grep -Fq 'homeDirectory = "/Users/tester"' "$fixture/nix/local.nix" || fail "bootstrap initializes home"
 grep -Fq "dotfilesDir = \"$fixture\"" "$fixture/nix/local.nix" || fail "bootstrap initializes repo path"
+grep -Fq 'hostName = "apple-silicon"' "$fixture/nix/local.nix" || fail "bootstrap selects a registered host"
 grep -Fq "#switch" "$log" || fail "bootstrap applies Home Manager"
 
 cp "$fixture/nix/local.nix" "$fixture/nix/local.before.nix"

@@ -1,5 +1,4 @@
-# Extra zsh settings managed in dotfiles.
-# Keep non-Nix-managed local integrations here.
+# Optional shared integrations managed in dotfiles.
 
 # Colorize `ls` output on macOS and highlight directories only.
 export CLICOLOR=1

@@ -2,6 +2,7 @@
 .direnv
 .env
 nix/local.nix
+zsh/local.zsh
 result
 result-*
 codex/auth.json

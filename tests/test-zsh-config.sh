@@ -16,14 +16,16 @@ for file in environment aliases keybindings completion integrations home-manager
 done
 
 previous_line=0
-for file in environment aliases keybindings completion integrations extra home-manager local; do
+for file in environment aliases keybindings completion integrations extra local home-manager; do
   line="$(grep -nF "source \"\$HOME/.config/zsh/$file.zsh\"" "$shell_config" | cut -d: -f1 | head -n1 || true)"
   [[ -n "$line" ]] || fail "Home Manager sources $file.zsh"
   (( line > previous_line )) || fail "Home Manager sources $file.zsh in order"
   previous_line="$line"
 done
 
-grep -Fq 'programs.zsh.enable' "$shell_config" \
+grep -Fq 'programs.zsh = {' "$shell_config" \
+  || fail "Home Manager configures Zsh"
+grep -Fq '    enable = true;' "$shell_config" \
   || fail "Home Manager enables Zsh"
 grep -Fq 'programs.fzf.enable' "$shell_config" \
   || fail "Home Manager enables fzf"
@@ -36,14 +38,6 @@ fi
 
 grep -Fqx 'zsh/local.zsh' "$repo_root/.gitignore" \
   || fail "host-only zsh config is ignored"
-for file in aliases.zsh environment.zsh keybindings.zsh completion.zsh integrations.zsh home-manager.zsh local.zsh; do
-  grep -Fq "$file" "$repo_root/zsh/README.md" \
-    || fail "zsh README documents $file"
-done
-grep -Fq '.p10k.zsh' "$repo_root/zsh/README.md" \
-  || fail "zsh README documents host-owned Powerlevel10k settings"
-grep -Fq 'home-manager switch' "$repo_root/zsh/README.md" \
-  || fail "zsh README explains when edits take effect"
 
 test_home="$(mktemp -d)"
 trap 'rm -rf "$test_home"' EXIT
@@ -65,11 +59,7 @@ cat >"$test_home/.config/zsh/local.zsh" <<'MOCK'
 export TEST_HOST_LOCAL_INTEGRATION=loaded
 MOCK
 
-if ZSH_CONFIG_DIR="$zsh_dir" \
-HOME="$test_home" \
-FZF_DEFAULT_OPTS='--height=40%' \
-PATH="$mock_bin:/usr/bin:/bin" \
-zsh -f -i -s <<'ZSH'
+cat >"$test_home/test-config.zsh" <<'ZSH'
 setopt errexit nounset pipefail
 
 source "$ZSH_CONFIG_DIR/environment.zsh"
@@ -78,6 +68,9 @@ source "$ZSH_CONFIG_DIR/keybindings.zsh"
 source "$ZSH_CONFIG_DIR/completion.zsh"
 source "$ZSH_CONFIG_DIR/integrations.zsh"
 source "$ZSH_CONFIG_DIR/extra.zsh"
+if [[ -f "$HOME/.config/zsh/local.zsh" ]]; then
+  source "$HOME/.config/zsh/local.zsh"
+fi
 source "$ZSH_CONFIG_DIR/home-manager.zsh"
 
 [[ "$EDITOR" == 'code --wait' ]]
@@ -110,10 +103,24 @@ source "$ZSH_CONFIG_DIR/integrations.zsh"
 [[ "$(home-manager switch -b custom)" == 'switch -b custom' ]]
 [[ "$(home-manager status)" == status ]]
 ZSH
-then
+
+if ZSH_CONFIG_DIR="$zsh_dir" \
+  HOME="$test_home" \
+  FZF_DEFAULT_OPTS='--height=40%' \
+  PATH="$mock_bin:/usr/bin:/bin" \
+  zsh -f -i "$test_home/test-config.zsh"; then
   :
 else
   fail "interactive zsh behavior works"
 fi
+
+for file in aliases.zsh environment.zsh keybindings.zsh completion.zsh integrations.zsh extra.zsh home-manager.zsh local.zsh; do
+  grep -Fq "$file" "$repo_root/zsh/README.md" \
+    || fail "zsh README documents $file"
+done
+grep -Fq '.p10k.zsh' "$repo_root/zsh/README.md" \
+  || fail "zsh README documents host-owned Powerlevel10k settings"
+grep -Fq 'home-manager switch' "$repo_root/zsh/README.md" \
+  || fail "zsh README explains when edits take effect"
 
 printf 'ok: zsh config tests\n'

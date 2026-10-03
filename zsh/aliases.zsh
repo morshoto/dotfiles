@@ -1,0 +1,8 @@
+alias ll="ls -al"
+alias gs="git status"
+alias gc="git commit"
+alias gp="git push"
+alias python="python3.11"
+alias python3="python3.11"
+alias k="kubectl"
+alias tf="terraform"

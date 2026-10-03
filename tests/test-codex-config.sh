@@ -19,7 +19,7 @@ git -C "$repo_root" ls-files --error-unmatch codex/portable.config.toml >/dev/nu
   || fail "project settings share the portable profile source"
 
 cd "$repo_root"
-nix eval --raw --expr '
+nix eval --impure --raw --expr '
   let
     config = builtins.fromTOML (builtins.readFile ./codex/portable.config.toml);
     expectedTopLevel = [
@@ -73,7 +73,7 @@ grep -Fq '".codex/portable.config.toml"' "$repo_root/nix/home/ai.nix" \
   || fail "Home Manager links the portable profile"
 grep -Fq 'codex --profile portable' "$repo_root/codex/README.md" \
   || fail "Codex docs explain how to apply the portable profile"
-grep -Fq 'trusted project' "$repo_root/codex/README.md" \
+grep -Fq 'this repository is trusted' "$repo_root/codex/README.md" \
   || fail "Codex docs explain the trusted project layer"
 
 printf 'ok: Codex configuration tests\n'

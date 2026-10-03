@@ -32,4 +32,47 @@ grep -Fq 'ai/skills' "$repo_root/README.md" \
 grep -Fq '~/.claude/skills' "$repo_root/README.md" \
   || fail "README explains the Claude skill link"
 
+inventory="$repo_root/doc/settings-inventory.md"
+[[ -f "$inventory" ]] || fail "settings inventory exists"
+grep -Fq '[Configuration inventory and scope](doc/settings-inventory.md)' \
+  "$repo_root/README.md" || fail "README links the settings inventory"
+grep -Fq '## Currently managed' "$inventory" \
+  || fail "inventory names managed settings"
+grep -Fq '## Intentionally local' "$inventory" \
+  || fail "inventory names local settings"
+grep -Fq '## Candidate decisions' "$inventory" \
+  || fail "inventory records candidate decisions"
+
+for decision in \
+  '| Powerlevel10k | Include |' \
+  '| GitHub CLI (`gh`) | Defer |' \
+  '| VS Code settings and keybindings | Defer |' \
+  '| Additional macOS defaults | Defer |'; do
+  grep -Fq "$decision" "$inventory" \
+    || fail "inventory records decision: $decision"
+done
+
+grep -Fq 'zsh/p10k.zsh' "$inventory" \
+  || fail "inventory names the Powerlevel10k source of truth"
+grep -Fq 'nix run "path:$PWD#switch"' "$inventory" \
+  || fail "inventory explains how to apply selected settings"
+grep -Fq '~/.config/gh/hosts.yml' "$inventory" \
+  || fail "inventory keeps GitHub CLI credentials local"
+grep -Fq 'mcp.json' "$inventory" \
+  || fail "inventory keeps VS Code MCP state local"
+grep -Fq 'chatLanguageModels.json' "$inventory" \
+  || fail "inventory keeps VS Code model state local"
+
+[[ -f "$repo_root/zsh/p10k.zsh" ]] \
+  || fail "Powerlevel10k config has a repository source"
+grep -Fq 'home.file.".p10k.zsh".source' "$repo_root/nix/home/dotfiles.nix" \
+  || fail "Home Manager applies the Powerlevel10k config"
+if grep -Eq 'Google application credentials|deathray-testing' "$repo_root/zsh/p10k.zsh"; then
+  fail "Powerlevel10k config excludes local credential examples"
+fi
+if grep -REq 'home\.file\..*(gh/hosts\.yml|mcp\.json|chatLanguageModels\.json)' \
+  "$repo_root/nix/home"; then
+  fail "Home Manager does not import private application state"
+fi
+
 printf 'ok: documentation tests\n'

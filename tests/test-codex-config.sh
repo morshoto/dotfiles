@@ -13,6 +13,10 @@ portable_config="$repo_root/codex/portable.config.toml"
 [[ -f "$portable_config" ]] || fail "portable Codex profile exists"
 git -C "$repo_root" ls-files --error-unmatch codex/portable.config.toml >/dev/null 2>&1 \
   || fail "portable Codex profile is tracked"
+[[ -L "$repo_root/.codex/config.toml" ]] \
+  || fail "portable settings are available as project configuration"
+[[ "$(readlink "$repo_root/.codex/config.toml")" == "../codex/portable.config.toml" ]] \
+  || fail "project settings share the portable profile source"
 
 cd "$repo_root"
 nix eval --raw --expr '
@@ -54,5 +58,7 @@ grep -Fq '".codex/portable.config.toml"' "$repo_root/nix/home/ai.nix" \
   || fail "Home Manager links the portable profile"
 grep -Fq 'codex --profile portable' "$repo_root/codex/README.md" \
   || fail "Codex docs explain how to apply the portable profile"
+grep -Fq 'trusted project' "$repo_root/codex/README.md" \
+  || fail "Codex docs explain the trusted project layer"
 
 printf 'ok: Codex configuration tests\n'

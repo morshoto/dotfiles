@@ -10,11 +10,14 @@ fail() {
 }
 
 [[ -f "$repo_root/nix/hosts/apple-silicon.nix" ]] || fail "Apple Silicon host exists"
-[[ -f "$repo_root/nix/hosts/generic-darwin.nix" ]] || fail "generic Darwin host exists"
+[[ ! -e "$repo_root/nix/hosts/generic-darwin.nix" ]] || fail "duplicate generic Darwin host is removed"
 grep -Fq 'hostName' "$repo_root/nix/local.example.nix" || fail "local example selects a host"
 
 home_hosts="$(nix eval --json "path:$repo_root#homeConfigurations" --apply 'builtins.attrNames')"
-grep -Fq 'apple-silicon' <<<"$home_hosts" || fail "Apple Silicon Home Manager output exists"
-grep -Fq 'generic-darwin' <<<"$home_hosts" || fail "generic Darwin Home Manager output exists"
+[[ "$home_hosts" == '["apple-silicon","default"]' ]] \
+  || fail "Home Manager exposes the supported target and default alias"
+
+apple_system="$(nix eval --raw "path:$repo_root#homeConfigurations.apple-silicon.pkgs.stdenv.hostPlatform.system")"
+[[ "$apple_system" == "aarch64-darwin" ]] || fail "Apple Silicon host targets aarch64-darwin"
 
 printf 'ok: host configuration tests\n'

@@ -35,8 +35,10 @@ chmod +x "$fake_bin/nix"
 log="$fixture/nix.log"
 
 run_bootstrap() {
+  local host_name="${1:-}"
   PATH="$fake_bin:$PATH" \
     DOTFILES_REPO_DIR="$fixture" \
+    DOTFILES_HOST="$host_name" \
     DOTFILES_BOOTSTRAP_SKIP_PLATFORM_CHECK=1 \
     DOTFILES_USERNAME=tester \
     DOTFILES_HOME=/Users/tester \
@@ -55,5 +57,11 @@ cp "$fixture/nix/local.nix" "$fixture/nix/local.before.nix"
 run_bootstrap
 cmp -s "$fixture/nix/local.nix" "$fixture/nix/local.before.nix" \
   || fail "bootstrap preserves an existing local configuration"
+
+rm "$fixture/nix/local.nix"
+if run_bootstrap generic-darwin; then
+  fail "bootstrap rejects an unregistered host"
+fi
+[[ ! -e "$fixture/nix/local.nix" ]] || fail "bootstrap rejects unknown hosts before writing local config"
 
 printf 'ok: bootstrap tests\n'

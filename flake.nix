@@ -163,7 +163,8 @@
               "$repo_root/tests/test-darwin-configuration.sh" \
               "$repo_root/tests/test-update-flake-workflow.sh" \
               "$repo_root/tests/test-flake-checks.sh" \
-              "$repo_root/tests/test-shared-ai.sh"; do
+              "$repo_root/tests/test-shared-ai.sh" \
+              "$repo_root/tests/test-codex-config.sh"; do
               bash "$test_script"
             done
 

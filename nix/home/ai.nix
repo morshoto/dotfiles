@@ -6,6 +6,9 @@ in
 {
   home.file.".codex/config.toml".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/config.toml";
 
+  home.file.".codex/portable.config.toml".source =
+    mkOutOfStoreSymlink "${dotfilesDir}/codex/portable.config.toml";
+
   home.file.".codex/AGENTS.md".source = mkOutOfStoreSymlink "${dotfilesDir}/codex/AGENTS.md";
 
   # Manage shared rule files inside the existing directory so local-only rules

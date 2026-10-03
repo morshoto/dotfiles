@@ -11,8 +11,6 @@ fail() {
 
 portable_config="$repo_root/codex/portable.config.toml"
 [[ -f "$portable_config" ]] || fail "portable Codex profile exists"
-git -C "$repo_root" ls-files --error-unmatch codex/portable.config.toml >/dev/null 2>&1 \
-  || fail "portable Codex profile is tracked"
 [[ -L "$repo_root/.codex/config.toml" ]] \
   || fail "portable settings are available as project configuration"
 [[ "$(readlink "$repo_root/.codex/config.toml")" == "../codex/portable.config.toml" ]] \
@@ -65,8 +63,12 @@ nix eval --impure --raw --expr '
       "ok"
 ' >/dev/null || fail "portable profile parses and has only portable keys"
 
-git -C "$repo_root" check-ignore -q codex/config.toml \
-  || fail "the machine-local Codex config remains ignored"
+if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$repo_root" ls-files --error-unmatch codex/portable.config.toml >/dev/null 2>&1 \
+    || fail "portable Codex profile is tracked"
+  git -C "$repo_root" check-ignore -q codex/config.toml \
+    || fail "the machine-local Codex config remains ignored"
+fi
 grep -Fq '".codex/config.toml"' "$repo_root/nix/home/ai.nix" \
   || fail "Home Manager keeps the machine-local config link"
 grep -Fq '".codex/portable.config.toml"' "$repo_root/nix/home/ai.nix" \

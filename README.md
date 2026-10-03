@@ -94,3 +94,4 @@ codex -m gpt-6-astra
 - [Install and switching](doc/nix-install.md)
 - [Update flow](doc/update.md)
 - [Repo notes](doc/notes.md)
+- [Configuration inventory and scope](doc/settings-inventory.md)

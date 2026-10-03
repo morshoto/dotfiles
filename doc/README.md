@@ -8,3 +8,4 @@ Reference notes for the Nix-managed dotfiles setup.
 - [Update flow](update.md)
 - [Repo notes](notes.md)
 - [Missing package troubleshooting](missing-package.md)
+- [Configuration inventory and scope](settings-inventory.md)

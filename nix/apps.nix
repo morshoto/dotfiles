@@ -10,6 +10,35 @@ let
   homeManagerBin = "${homeManager.packages.${system}.home-manager}/bin/home-manager";
   darwinRebuildBin = "${nixDarwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild";
   flakeRef = "path:$PWD#${homeConfigurationName}";
+  appDescriptions = {
+    build = "Build the Home Manager configuration for this repo";
+    check = "Run flake checks for this repo";
+    darwin-switch = "Apply the nix-darwin and Home Manager configuration";
+    fmt = "Format Nix files for this repo";
+    help = "List available Nix flake commands";
+    switch = "Apply the Home Manager configuration for this repo";
+    update = "Update flake inputs, show revisions, and apply the Home Manager configuration";
+  };
+  commandNames = builtins.attrNames appDescriptions;
+  commandWidth = builtins.foldl' (
+    width: name:
+    let
+      nameWidth = builtins.stringLength "nix run .#${name}";
+    in
+    if nameWidth > width then nameWidth else width
+  ) 0 commandNames;
+  helpCommandList = builtins.concatStringsSep "\n" (
+    builtins.map (
+      name:
+      let
+        command = "nix run .#${name}";
+        padding = pkgs.lib.concatStrings (
+          pkgs.lib.genList (_: " ") (commandWidth - builtins.stringLength command + 2)
+        );
+      in
+      "  ${command}${padding}${appDescriptions.${name}}"
+    ) commandNames
+  );
   mkScript =
     name: file: substitutions:
     pkgs.writeShellScript name (
@@ -27,13 +56,13 @@ in
         FLAKE_REF = flakeRef;
       }
     );
-    meta.description = "Build the Home Manager configuration for this repo";
+    meta.description = appDescriptions.build;
   };
 
   check = {
     type = "app";
     program = toString (mkScript "check" ../scripts/apps/check.sh { });
-    meta.description = "Run flake checks for this repo";
+    meta.description = appDescriptions.check;
   };
 
   fmt = {
@@ -43,7 +72,17 @@ in
         NIXFMT_BIN = "${pkgs.nixfmt}/bin/nixfmt";
       }
     );
-    meta.description = "Format Nix files for this repo";
+    meta.description = appDescriptions.fmt;
+  };
+
+  help = {
+    type = "app";
+    program = toString (
+      mkScript "help" ../scripts/apps/help.sh {
+        APP_COMMANDS = helpCommandList;
+      }
+    );
+    meta.description = appDescriptions.help;
   };
 
   switch = {
@@ -55,7 +94,7 @@ in
         NIX_STORE_DIR = builtins.storeDir;
       }
     );
-    meta.description = "Apply the Home Manager configuration for this repo";
+    meta.description = appDescriptions.switch;
   };
 
   darwin-switch = {
@@ -66,12 +105,12 @@ in
         HOME_CONFIGURATION_NAME = homeConfigurationName;
       }
     );
-    meta.description = "Apply the nix-darwin and Home Manager configuration";
+    meta.description = appDescriptions."darwin-switch";
   };
 
   update = {
     type = "app";
     program = toString (mkScript "update" ../scripts/apps/update.sh { });
-    meta.description = "Update flake inputs, show revisions, and apply the Home Manager configuration";
+    meta.description = appDescriptions.update;
   };
 }

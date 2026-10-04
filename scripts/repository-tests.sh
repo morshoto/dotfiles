@@ -13,7 +13,8 @@ for test_script in \
   "$src/tests/test-shared-ai.sh" \
   "$src/tests/test-codex-config.sh" \
   "$src/tests/test-zsh-config.sh" \
-  "$src/tests/test-nix-shell-scripts.sh"; do
+  "$src/tests/test-nix-shell-scripts.sh" \
+  "$src/tests/test-help-app.sh"; do
   bash "$test_script"
 done
 

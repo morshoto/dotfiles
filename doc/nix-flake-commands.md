@@ -9,6 +9,7 @@ the repository root.
 
 | Command | Purpose |
 | --- | --- |
+| `nix run "path:$PWD#help"` | List the available `nix run` commands and their purposes. |
 | `nix flake show "path:$PWD"` | List the outputs exposed by this flake. |
 | `nix flake check --all-systems "path:$PWD"` | Evaluate and run the flake checks for all supported systems. |
 | `nix run "path:$PWD#check"` | Run the flake checks for the current system. |

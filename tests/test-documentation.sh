@@ -17,6 +17,7 @@ for command in \
   'nix flake check --all-systems "path:$PWD"' \
   'nix run "path:$PWD#check" -- --all-systems' \
   'nix run "path:$PWD#build"' \
+  'nix run "path:$PWD#help"' \
   'nix run "path:$PWD#switch"' \
   'nix run "path:$PWD#darwin-switch"' \
   'nix run "path:$PWD#fmt"' \

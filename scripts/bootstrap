@@ -83,6 +83,10 @@ if [[ ! -f "$local_file" ]]; then
     || die "DOTFILES_HOME contains characters unsafe for Nix"
   [[ "$repo_dir" != *'"'* && "$repo_dir" != *'\\'* && "$repo_dir" != *'${'* ]] \
     || die "repository path contains characters unsafe for Nix"
+  [[ -f "$repo_dir/nix/hosts/$host_name.nix" ]] || die "unknown DOTFILES_HOST: $host_name"
+  grep -Eq "^[[:space:]]*${host_name}[[:space:]]*=[[:space:]]*import[[:space:]]+\\./${host_name}\\.nix;" \
+    "$repo_dir/nix/hosts/default.nix" \
+    || die "DOTFILES_HOST is not registered: $host_name"
 
   local_tmp="$(mktemp "$repo_dir/nix/local.nix.XXXXXX")"
   awk \

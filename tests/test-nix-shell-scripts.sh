@@ -93,7 +93,12 @@ printf 'Additional activation detail\n'
 printf 'Custom hook completed in %s\n' "$HOME"
 printf "Existing file '%s/.p10k.zsh' is in the way of '/nix/store/example/.p10k.zsh', will be moved to '%s/.p10k.zsh.hm-backup'\n" \
   "$HOME" "$HOME"
-printf 'There are 293 unread news items. Use "home-manager news" to review them.\n'
+if [[ "${HOME_MANAGER_NEWS_COUNT:-293}" == unavailable ]]; then
+  printf 'Home Manager has unread news. Use "home-manager news" to review them.\n'
+else
+  printf 'There are %s unread news items. Use "home-manager news" to review them.\n' \
+    "${HOME_MANAGER_NEWS_COUNT:-293}"
+fi
 if [[ "${HOME_MANAGER_FAIL:-0}" == 1 ]]; then
   printf 'Home Manager activation failed\n' >&2
   exit 42
@@ -143,12 +148,17 @@ grep -Fqx '   Custom hook completed in ~' "$test_home/switch-output" || {
   cat "$test_home/switch-output" >&2
   fail "switch shortens home paths in additional details"
 }
-grep -Fqx ' ! Home Manager has unread news; run `home-manager news` to review it.' \
-  "$test_home/switch-output" || fail "switch preserves the Home Manager news notice"
+grep -Fqx ' ! Home Manager has 293 unread news items; run `home-manager news` to review it.' \
+  "$test_home/switch-output" || fail "switch prints the Home Manager unread news count"
 assert_switch_status 'Home Manager configuration' 'Applied'
 if grep -Fq "$test_home" "$test_home/switch-output"; then
   fail "successful switch output hides absolute paths"
 fi
+
+HOME="$test_home" HOME_MANAGER_NEWS_COUNT=unavailable \
+  "$test_home/switch" > "$test_home/news-output" 2>&1
+grep -Fqx ' ! Home Manager has unread news; run `home-manager news` to review it.' \
+  "$test_home/news-output" || fail "switch falls back when the news count is unavailable"
 
 HOME="$test_home" HOME_MANAGER_WAIT_FOR_RELEASE=1 \
   "$test_home/switch" > "$test_home/stream-output" 2>&1 &

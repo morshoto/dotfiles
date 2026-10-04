@@ -19,7 +19,7 @@ the repository root.
 
 | Command | Purpose |
 | --- | --- |
-| `nix run "path:$PWD#switch"` | Apply the Home Manager configuration for the current user with English progress streamed as activation runs. Existing files and conflicting skill-directory symlinks are preserved with an `hm-backup` suffix; full activation details are shown if the switch fails. |
+| `nix run "path:$PWD#switch"` | Apply the Home Manager configuration for the current user with English live progress and the unread-news count when available. Existing files and conflicting skill-directory symlinks are preserved with an `hm-backup` suffix; full activation details are shown if the switch fails. |
 | `nix run "path:$PWD#darwin-switch"` | Apply nix-darwin system settings and Home Manager; this command uses `sudo`. |
 | `./scripts/bootstrap` | Set up a fresh supported Apple Silicon Mac and apply its Home Manager configuration. |
 

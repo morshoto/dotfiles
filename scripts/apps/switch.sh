@@ -138,7 +138,13 @@ fi
 
 if [[ "$activation_status" == 0 ]]; then
   if grep -Fq 'home-manager news' "$activation_log"; then
-    printf ' ! Home Manager has unread news; run `home-manager news` to review it.\n'
+    news_item_count="$(sed -nE 's/.*There are ([0-9]+) unread news items\..*/\1/p' "$activation_log" | tail -n1)"
+    if [[ -n "$news_item_count" ]]; then
+      printf ' ! Home Manager has %s unread news items; run `home-manager news` to review it.\n' \
+        "$news_item_count"
+    else
+      printf ' ! Home Manager has unread news; run `home-manager news` to review it.\n'
+    fi
   fi
   print_status 'Home Manager configuration' 'Applied'
 else

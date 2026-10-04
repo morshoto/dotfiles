@@ -1,11 +1,12 @@
 # Zsh Config
 
 The Zsh directory is linked out of the Nix store to `~/.config/zsh`. Edit the
-file for each concern here; `nix/home/shell.nix` keeps the Home Manager options
-and the order in which these files are sourced.
+file for each concern here; `nix/home/shell.nix` reads `init.zsh` as Home
+Manager's startup content.
 
 | Concern | File |
 | --- | --- |
+| Startup file loading | `init.zsh` |
 | Environment defaults | `environment.zsh` |
 | Aliases | `aliases.zsh` |
 | Key bindings | `keybindings.zsh` |
@@ -16,8 +17,8 @@ and the order in which these files are sourced.
 | Host-only integrations | `local.zsh` |
 
 Edits to these Zsh files are available to new shells immediately through the
-out-of-store link. Restart a shell to load the changes there. Changes to the
-Home Manager wiring in `nix/home/shell.nix` take effect after `home-manager switch`.
+out-of-store link. Restart a shell to load the changes there. Changes to
+`init.zsh` or the Home Manager wiring take effect after `home-manager switch`.
 
 `extra.zsh` holds optional integrations shared by this dotfiles checkout. Put
 integrations for only one host in `local.zsh`; that file is gitignored and

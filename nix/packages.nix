@@ -21,9 +21,7 @@ let
 
     dontUnpack = true;
 
-    installPhase = ''
-      install -Dm755 "$src" "$out/bin/agent-browser"
-    '';
+    installPhase = builtins.readFile ../scripts/install-agent-browser.sh;
   };
 
   packageList =

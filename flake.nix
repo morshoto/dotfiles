@@ -99,80 +99,29 @@
         homeConfigurationName = hostName;
       };
 
-      nixFormatCheck =
-        primaryPkgs.runCommand "nix-format-check"
-          {
-            nativeBuildInputs = [ primaryPkgs.nixfmt ];
-          }
-          ''
-            set -euo pipefail
+      nixFormatCheck = primaryPkgs.runCommand "nix-format-check" {
+        nativeBuildInputs = [ primaryPkgs.nixfmt ];
+        src = ./.;
+      } (builtins.readFile ./scripts/nix-format-check.sh);
 
-            while IFS= read -r -d "" file; do
-              nixfmt --check "$file"
-            done < <(find ${./.} -type f -name '*.nix' -print0)
+      shellSyntaxCheck = primaryPkgs.runCommand "shell-syntax-check" {
+        nativeBuildInputs = with primaryPkgs; [
+          bash
+          fish
+          zsh
+        ];
+        src = ./.;
+      } (builtins.readFile ./scripts/shell-syntax-check.sh);
 
-            touch "$out"
-          '';
-
-      shellSyntaxCheck =
-        primaryPkgs.runCommand "shell-syntax-check"
-          {
-            nativeBuildInputs = with primaryPkgs; [
-              bash
-              fish
-              zsh
-            ];
-          }
-          ''
-            set -euo pipefail
-
-            while IFS= read -r -d "" file; do
-              bash -n "$file"
-            done < <(find ${./scripts} ${./tests} -type f -name '*.sh' -print0)
-
-            while IFS= read -r -d "" file; do
-              zsh -n "$file"
-            done < <(find ${./zsh} -type f -name '*.zsh' -print0)
-
-            while IFS= read -r -d "" file; do
-              fish -n "$file"
-            done < <(find ${./fish} -type f -name '*.fish' -print0)
-
-            touch "$out"
-          '';
-
-      repositoryTests =
-        primaryPkgs.runCommand "repository-tests"
-          {
-            nativeBuildInputs = with primaryPkgs; [
-              bash
-              git
-              nix
-              zsh
-            ];
-          }
-          ''
-            set -euo pipefail
-            export HOME="$TMPDIR/home"
-            mkdir -p "$HOME"
-
-            repo_root=${./.}
-            for test_script in \
-              "$repo_root/tests/test-bootstrap.sh" \
-              "$repo_root/tests/test-documentation.sh" \
-              "$repo_root/tests/test-host-configurations.sh" \
-              "$repo_root/tests/test-darwin-configuration.sh" \
-              "$repo_root/tests/test-update-flake-workflow.sh" \
-              "$repo_root/tests/test-flake-checks.sh" \
-              "$repo_root/tests/test-shared-ai.sh" \
-              "$repo_root/tests/test-codex-config.sh" \
-              "$repo_root/tests/test-zsh-config.sh" \
-              "$repo_root/tests/test-nix-shell-scripts.sh"; do
-              bash "$test_script"
-            done
-
-            touch "$out"
-          '';
+      repositoryTests = primaryPkgs.runCommand "repository-tests" {
+        nativeBuildInputs = with primaryPkgs; [
+          bash
+          git
+          nix
+          zsh
+        ];
+        src = ./.;
+      } (builtins.readFile ./scripts/repository-tests.sh);
     in
     assert _validateHost == null;
     {

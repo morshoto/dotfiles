@@ -25,7 +25,7 @@ for file in \
 done
 
 for script in build check darwin-switch fmt switch update; do
-  grep -Fq "builtins.readFile ../scripts/apps/$script.sh" "$repo_root/nix/apps.nix" \
+  grep -Fq "mkScript \"$script\" ../scripts/apps/$script.sh" "$repo_root/nix/apps.nix" \
     || fail "Nix app reads scripts/apps/$script.sh"
 done
 

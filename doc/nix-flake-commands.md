@@ -35,6 +35,12 @@ the repository root.
 
 ## Warnings
 
-Nix may print a `builtins.derivation` store-context warning while evaluating
-the Home Manager configuration. A warning alone does not mean the check failed:
-confirm that the command exits successfully and the checks report success.
+The tracked host keeps `dotfilesDir` as a path value so Home Manager's
+out-of-store symlink derivations retain the required store context. The
+remaining `builtins.derivation` warning for `options.json` comes from Home
+Manager's upstream option-docs builder (`home-manager` input,
+`docs/default.nix`), which wraps NixOS option documentation in a derivation that
+loses its store context. Fixing that requires an upstream Home Manager change
+or a local fork/override; this repo does not suppress the warning. A warning
+alone does not mean the check failed: confirm that the command exits
+successfully and the checks report success.

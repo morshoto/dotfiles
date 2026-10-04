@@ -20,4 +20,14 @@ home_hosts="$(nix eval --json "path:$repo_root#homeConfigurations" --apply 'buil
 apple_system="$(nix eval --raw "path:$repo_root#homeConfigurations.apple-silicon.pkgs.stdenv.hostPlatform.system")"
 [[ "$apple_system" == "aarch64-darwin" ]] || fail "Apple Silicon host targets aarch64-darwin"
 
+dotfiles_dir_type="$(nix eval --raw --impure --expr "builtins.typeOf (import \"$repo_root/nix/hosts/default.nix\").apple-silicon.dotfilesDir")"
+[[ "$dotfiles_dir_type" == path ]] \
+  || fail "host dotfilesDir retains path context for Home Manager symlink derivations"
+
+activation_warnings="$(nix eval --show-trace --raw "path:$repo_root#homeConfigurations.default.activationPackage.drvPath" 2>&1 >/dev/null)" \
+  || fail "Home Manager activation derivation evaluates"
+if grep -Fq "derivation named 'hm_" <<<"$activation_warnings"; then
+  fail "Home Manager symlink derivations retain their store path context"
+fi
+
 printf 'ok: host configuration tests\n'

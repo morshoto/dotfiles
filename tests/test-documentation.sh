@@ -27,6 +27,10 @@ for command in \
 done
 grep -Fq 'builtins.derivation' "$flake_commands" \
   || fail "Nix command reference explains the known warning"
+grep -Fq 'options.json' "$flake_commands" \
+  || fail "Nix command reference identifies the upstream options.json warning"
+grep -Fq 'docs/default.nix' "$flake_commands" \
+  || fail "Nix command reference points to the upstream warning source"
 
 grep -Fq './scripts/bootstrap' "$repo_root/README.md" || fail "README documents bootstrap"
 grep -Fq 'darwin-switch' "$repo_root/README.md" || fail "README documents Darwin apply"

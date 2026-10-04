@@ -72,6 +72,6 @@ in
   update = {
     type = "app";
     program = toString (mkScript "update" ../scripts/apps/update.sh { });
-    meta.description = "Update flake inputs and apply the Home Manager configuration";
+    meta.description = "Update flake inputs, show revisions, and apply the Home Manager configuration";
   };
 }

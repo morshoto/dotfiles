@@ -29,7 +29,7 @@ the repository root.
 | --- | --- |
 | `nix run "path:$PWD#fmt"` | Format Nix files below the current directory. Add `-- --check` to check formatting without writing changes. |
 | `nix flake update --flake "path:$PWD"` | Update the locked flake inputs without applying the configuration. |
-| `nix run "path:$PWD#update"` | Update flake inputs, then apply the Home Manager configuration. This modifies `flake.lock` and may change installed packages. |
+| `nix run "path:$PWD#update"` | Update flake inputs, list changed inputs with their old and new revisions, then apply the Home Manager configuration. This modifies `flake.lock` and may change installed packages. |
 | `nix develop "path:$PWD"` | Enter the repository's development shell. |
 | `nix profile add "path:$PWD#dotfiles-pkg"` | Install the compatibility package into a Nix profile. Home Manager is the primary package manager for this repository. |
 

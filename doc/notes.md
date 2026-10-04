@@ -9,4 +9,5 @@
   both Codex and Claude Code home directories.
 - `home.packages` is the canonical CLI package list. The `dotfiles-pkg` flake
   package is retained as a compatibility bundle for `nix profile` workflows.
-- `nix-darwin` is intentionally not included yet.
+- `nix-darwin` manages macOS system configuration alongside Home Manager and is
+  exposed through `darwinConfigurations` with the `darwin-switch` app for applying changes.

@@ -32,4 +32,14 @@ grep -Fq 'ai/skills' "$repo_root/README.md" \
 grep -Fq '~/.claude/skills' "$repo_root/README.md" \
   || fail "README explains the Claude skill link"
 
+grep -Fq 'nix-darwin' "$repo_root/doc/notes.md" \
+  || fail "repo notes document nix-darwin"
+grep -Fq 'darwinConfigurations' "$repo_root/doc/notes.md" \
+  || fail "repo notes describe Darwin outputs"
+grep -Fq 'darwin-switch' "$repo_root/doc/notes.md" \
+  || fail "repo notes describe Darwin apply"
+if grep -Fq 'nix-darwin is intentionally not included yet' "$repo_root/doc/notes.md"; then
+  fail "repo notes do not claim nix-darwin is absent"
+fi
+
 printf 'ok: documentation tests\n'

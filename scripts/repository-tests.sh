@@ -8,6 +8,7 @@ for test_script in \
   "$src/tests/test-host-configurations.sh" \
   "$src/tests/test-darwin-configuration.sh" \
   "$src/tests/test-update-flake-workflow.sh" \
+  "$src/tests/test-update-app.sh" \
   "$src/tests/test-flake-checks.sh" \
   "$src/tests/test-shared-ai.sh" \
   "$src/tests/test-codex-config.sh" \

@@ -148,6 +148,7 @@
               bash
               git
               nix
+              zsh
             ];
           }
           ''
@@ -165,7 +166,8 @@
               "$repo_root/tests/test-flake-checks.sh" \
               "$repo_root/tests/test-shared-ai.sh" \
               "$repo_root/tests/test-codex-config.sh" \
-              "$repo_root/tests/test-zsh-config.sh"; do
+              "$repo_root/tests/test-zsh-config.sh" \
+              "$repo_root/tests/test-nix-shell-scripts.sh"; do
               bash "$test_script"
             done
 

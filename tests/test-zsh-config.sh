@@ -15,14 +15,18 @@ for file in environment aliases keybindings completion integrations home-manager
   [[ -f "$zsh_dir/$file.zsh" ]] || fail "zsh config includes $file.zsh"
 done
 
+[[ -f "$zsh_dir/init.zsh" ]] || fail "zsh config includes init.zsh"
+
 previous_line=0
 for file in environment aliases keybindings completion integrations extra local home-manager; do
-  line="$(grep -nF "source \"\$HOME/.config/zsh/$file.zsh\"" "$shell_config" | cut -d: -f1 | head -n1 || true)"
-  [[ -n "$line" ]] || fail "Home Manager sources $file.zsh"
-  (( line > previous_line )) || fail "Home Manager sources $file.zsh in order"
+  line="$(grep -nF "source \"\$HOME/.config/zsh/$file.zsh\"" "$zsh_dir/init.zsh" | cut -d: -f1 | head -n1 || true)"
+  [[ -n "$line" ]] || fail "Zsh init sources $file.zsh"
+  (( line > previous_line )) || fail "Zsh init sources $file.zsh in order"
   previous_line="$line"
 done
 
+grep -Fq 'initContent = builtins.readFile ../../zsh/init.zsh;' "$shell_config" \
+  || fail "Home Manager reads init content from a Zsh file"
 grep -Fq 'programs.zsh = {' "$shell_config" \
   || fail "Home Manager configures Zsh"
 grep -Fq '    enable = true;' "$shell_config" \
@@ -42,8 +46,10 @@ grep -Fqx 'zsh/local.zsh' "$repo_root/.gitignore" \
 test_home="$(mktemp -d)"
 trap 'rm -rf "$test_home"' EXIT
 mock_bin="$test_home/bin"
-mkdir -p "$mock_bin" "$test_home/.config/zsh" \
+mkdir -p "$mock_bin" "$test_home/.config" \
   "$test_home/Downloads/google-cloud-sdk"
+cp -R "$zsh_dir" "$test_home/.config/zsh"
+chmod -R u+w "$test_home/.config/zsh"
 cat >"$mock_bin/home-manager" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*"
@@ -62,16 +68,7 @@ MOCK
 cat >"$test_home/test-config.zsh" <<'ZSH'
 setopt errexit nounset pipefail
 
-source "$ZSH_CONFIG_DIR/environment.zsh"
-source "$ZSH_CONFIG_DIR/aliases.zsh"
-source "$ZSH_CONFIG_DIR/keybindings.zsh"
-source "$ZSH_CONFIG_DIR/completion.zsh"
-source "$ZSH_CONFIG_DIR/integrations.zsh"
-source "$ZSH_CONFIG_DIR/extra.zsh"
-if [[ -f "$HOME/.config/zsh/local.zsh" ]]; then
-  source "$HOME/.config/zsh/local.zsh"
-fi
-source "$ZSH_CONFIG_DIR/home-manager.zsh"
+source "$HOME/.config/zsh/init.zsh"
 
 [[ "$EDITOR" == 'code --wait' ]]
 [[ "$LANG" == 'ja_JP.UTF-8' ]]
@@ -114,7 +111,7 @@ else
   fail "interactive zsh behavior works"
 fi
 
-for file in aliases.zsh environment.zsh keybindings.zsh completion.zsh integrations.zsh extra.zsh home-manager.zsh local.zsh; do
+for file in init.zsh aliases.zsh environment.zsh keybindings.zsh completion.zsh integrations.zsh extra.zsh home-manager.zsh local.zsh; do
   grep -Fq "$file" "$repo_root/zsh/README.md" \
     || fail "zsh README documents $file"
 done

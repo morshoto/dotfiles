@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+fail() {
+  printf 'FAIL: %s\n' "$1" >&2
+  exit 1
+}
+
+portable_config="$repo_root/codex/portable.config.toml"
+[[ -f "$portable_config" ]] || fail "portable Codex profile exists"
+[[ -L "$repo_root/.codex/config.toml" ]] \
+  || fail "portable settings are available as project configuration"
+[[ "$(readlink "$repo_root/.codex/config.toml")" == "../codex/portable.config.toml" ]] \
+  || fail "project settings share the portable profile source"
+
+cd "$repo_root"
+nix eval --impure --raw --expr '
+  let
+    config = builtins.fromTOML (builtins.readFile ./codex/portable.config.toml);
+    expectedTopLevel = [
+      "approval_policy"
+      "approvals_reviewer"
+      "features"
+      "model"
+      "model_reasoning_effort"
+      "personality"
+      "sandbox_mode"
+    ];
+    expectedFeatures = [
+      "codex_git_commit"
+      "goals"
+      "js_repl"
+      "memories"
+      "multi_agent"
+      "rmcp_client"
+    ];
+    actualTopLevel = builtins.sort builtins.lessThan (builtins.attrNames config);
+    actualFeatures = builtins.sort builtins.lessThan (builtins.attrNames config.features);
+    collectStrings = value:
+      if builtins.isAttrs value then
+        builtins.concatLists (builtins.map collectStrings (builtins.attrValues value))
+      else if builtins.isList value then
+        builtins.concatLists (builtins.map collectStrings value)
+      else if builtins.isString value then
+        [ value ]
+      else
+        [ ];
+    hasHostPath = builtins.any
+      (value: builtins.match ".*(/Users/|/home/|/nix/store/).*" value != null
+        || builtins.match "^~/.*" value != null)
+      (collectStrings config);
+  in
+    if actualTopLevel != expectedTopLevel then
+      throw "portable profile must contain only reviewed portable settings"
+    else if actualFeatures != expectedFeatures then
+      throw "portable profile feature flags must match the reviewed allowlist"
+    else if hasHostPath then
+      throw "portable profile must not contain machine paths"
+    else
+      "ok"
+' >/dev/null || fail "portable profile parses and has only portable keys"
+
+if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$repo_root" ls-files --error-unmatch codex/portable.config.toml >/dev/null 2>&1 \
+    || fail "portable Codex profile is tracked"
+  git -C "$repo_root" check-ignore -q codex/config.toml \
+    || fail "the machine-local Codex config remains ignored"
+fi
+grep -Fq '".codex/config.toml"' "$repo_root/nix/home/ai.nix" \
+  || fail "Home Manager keeps the machine-local config link"
+grep -Fq '".codex/portable.config.toml"' "$repo_root/nix/home/ai.nix" \
+  || fail "Home Manager links the portable profile"
+grep -Fq 'codex --profile portable' "$repo_root/codex/README.md" \
+  || fail "Codex docs explain how to apply the portable profile"
+grep -Fq 'this repository is trusted' "$repo_root/codex/README.md" \
+  || fail "Codex docs explain the trusted project layer"
+
+printf 'ok: Codex configuration tests\n'

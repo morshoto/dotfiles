@@ -57,6 +57,7 @@ codex -m gpt-6-astra
 ```txt
 .
 ├── .github/
+├── .codex/
 ├── ai/
 │   └── skills/
 ├── codex/
@@ -86,6 +87,8 @@ codex -m gpt-6-astra
   after `nix run "path:$PWD#switch"`.
 - Codex-specific instructions and rules remain under `codex/`; private
   authentication and session data stay outside the repository.
+- Portable Codex defaults live in `codex/portable.config.toml`; see
+  [Codex configuration](codex/README.md) for applying and editing them.
 - `dotfiles-pkg` remains available for `nix profile` compatibility, but
   `home.packages` is the primary source of truth.
 

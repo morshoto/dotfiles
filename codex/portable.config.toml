@@ -1,0 +1,15 @@
+# Shared Codex settings. Keep host paths and app-managed state local.
+model = "gpt-6-luna"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+approvals_reviewer = "user"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[features]
+codex_git_commit = true
+goals = true
+js_repl = false
+memories = true
+multi_agent = true
+rmcp_client = true

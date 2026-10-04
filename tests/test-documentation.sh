@@ -9,6 +9,25 @@ fail() {
   exit 1
 }
 
+flake_commands="$repo_root/doc/nix-flake-commands.md"
+[[ -f "$flake_commands" ]] || fail "Nix flake command reference exists"
+grep -Fq '[Nix flake commands](doc/nix-flake-commands.md)' \
+  "$repo_root/README.md" || fail "README links Nix flake commands"
+for command in \
+  'nix flake check --all-systems "path:$PWD"' \
+  'nix run "path:$PWD#check" -- --all-systems' \
+  'nix run "path:$PWD#build"' \
+  'nix run "path:$PWD#switch"' \
+  'nix run "path:$PWD#darwin-switch"' \
+  'nix run "path:$PWD#fmt"' \
+  'nix run "path:$PWD#update"' \
+  'nix develop "path:$PWD"' \
+  'nix flake show "path:$PWD"'; do
+  grep -Fq "$command" "$flake_commands" || fail "Nix command reference includes $command"
+done
+grep -Fq 'builtins.derivation' "$flake_commands" \
+  || fail "Nix command reference explains the known warning"
+
 grep -Fq './scripts/bootstrap' "$repo_root/README.md" || fail "README documents bootstrap"
 grep -Fq 'darwin-switch' "$repo_root/README.md" || fail "README documents Darwin apply"
 grep -Fq '`apple-silicon`' "$repo_root/README.md" || fail "README documents the supported host"

@@ -8,6 +8,10 @@ if [[ -t 1 ]]; then
   failure_mark=$'\033[31m✘\033[0m'
 fi
 
+print_status() {
+  printf ' %s %-30s %s\n' "$success_mark" "$1" "$2"
+}
+
 backup_directory_symlink() {
   local relative_path="$1"
   local target_path="$HOME/$relative_path"
@@ -35,10 +39,10 @@ backup_directory_symlink() {
   done
 
   if ! mv "$target_path" "$backup_path"; then
-    printf ' %s Failed to back up %s\n' "$failure_mark" "$target_label" >&2
+    printf ' %s %-30s %s\n' "$failure_mark" "$target_label" 'Backup failed' >&2
     return 1
   fi
-  printf ' %s Backed up %s -> %s\n' "$success_mark" "$target_label" "$backup_label"
+  print_status "$target_label" "Backed up to $backup_label"
 }
 
 report_home_manager_backups() {
@@ -54,14 +58,14 @@ report_home_manager_backups() {
     if [[ "$backup_path" == "$HOME/"* ]]; then
       backup_label="~/${backup_path#"$HOME"/}"
     fi
-    printf ' %s Backed up %s -> %s\n' "$success_mark" "$target_label" "$backup_label"
+    print_status "$target_label" "Backed up to $backup_label"
   done < <(awk -F "'" '/will be moved to/ { print $2 "|" $6 }' "$activation_log")
 }
 
 activation_log="$(mktemp)"
 trap 'rm -f "$activation_log"' EXIT
 
-printf '[+] Applying Home Manager configuration\n'
+printf '[+] Home Manager switch\n'
 backup_directory_symlink ".codex/skills"
 backup_directory_symlink ".claude/skills"
 
@@ -71,10 +75,10 @@ if "@HOME_MANAGER_BIN@" switch -b hm-backup --impure --flake "@FLAKE_REF@" "$@" 
   if grep -Fq 'home-manager news' "$activation_log"; then
     printf ' ! Home Manager has unread news; run `home-manager news` to review it.\n'
   fi
-  printf ' %s Home Manager configuration applied\n' "$success_mark"
+  print_status 'Home Manager configuration' 'Applied'
 else
   activation_status=$?
-  printf ' %s Home Manager switch failed\n' "$failure_mark" >&2
+  printf ' %s %-30s %s\n' "$failure_mark" 'Home Manager configuration' 'Failed' >&2
   cat "$activation_log" >&2
   exit "$activation_status"
 fi

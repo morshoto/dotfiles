@@ -87,17 +87,17 @@ HOME="$test_home" "$test_home/switch" --show-trace > "$test_home/switch-output" 
   || fail "Home Manager switch runs after preserving directory symlinks"
 [[ "$(cat "$test_home/home-manager-locale")" == C ]] \
   || fail "Home Manager runs with English locale"
-grep -Fqx '[+] Applying Home Manager configuration' "$test_home/switch-output" \
+grep -Fqx '[+] Home Manager switch' "$test_home/switch-output" \
   || fail "switch prints a Docker-style heading"
-grep -Fqx ' ✔ Backed up ~/.codex/skills -> ~/.codex/skills.hm-backup.1' \
+grep -Fqx ' ✔ ~/.codex/skills                Backed up to ~/.codex/skills.hm-backup.1' \
   "$test_home/switch-output" || fail "switch prints concise backup status"
-grep -Fqx ' ✔ Backed up ~/.claude/skills -> ~/.claude/skills.hm-backup' \
+grep -Fqx ' ✔ ~/.claude/skills               Backed up to ~/.claude/skills.hm-backup' \
   "$test_home/switch-output" || fail "switch prints concise backup status"
-grep -Fqx ' ✔ Backed up ~/.p10k.zsh -> ~/.p10k.zsh.hm-backup' \
+grep -Fqx ' ✔ ~/.p10k.zsh                    Backed up to ~/.p10k.zsh.hm-backup' \
   "$test_home/switch-output" || fail "switch summarizes Home Manager backups"
 grep -Fqx ' ! Home Manager has unread news; run `home-manager news` to review it.' \
   "$test_home/switch-output" || fail "switch preserves the Home Manager news notice"
-grep -Fqx ' ✔ Home Manager configuration applied' "$test_home/switch-output" \
+grep -Fqx ' ✔ Home Manager configuration     Applied' "$test_home/switch-output" \
   || fail "switch prints a concise success status"
 if grep -Fq 'Verbose activation detail' "$test_home/switch-output" \
   || grep -Fq "$test_home" "$test_home/switch-output"; then
@@ -119,7 +119,7 @@ HOME="$test_home" HOME_MANAGER_FAIL=1 \
 switch_status=$?
 set -e
 [[ "$switch_status" == 42 ]] || fail "switch preserves the activation failure status"
-grep -Fq ' ✘ Home Manager switch failed' "$test_home/failure-output" \
+grep -Fq ' ✘ Home Manager configuration     Failed' "$test_home/failure-output" \
   || fail "switch prints a failure status"
 grep -Fq 'Home Manager activation failed' "$test_home/failure-output" \
   || fail "switch prints activation details on failure"

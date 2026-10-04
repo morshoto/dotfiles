@@ -9,6 +9,13 @@ fail() {
   exit 1
 }
 
+assert_switch_status() {
+  local expected
+  printf -v expected ' ✔ %-30s %s' "$1" "$2"
+  grep -Fqx "$expected" "$test_home/switch-output" \
+    || fail "switch prints status: $1"
+}
+
 for file in \
   scripts/apps/build.sh \
   scripts/apps/check.sh \
@@ -56,7 +63,19 @@ cat > "$mock_bin/home-manager" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$HOME/home-manager-args"
 printf '%s\n' "${LC_ALL:-unset}" > "$HOME/home-manager-locale"
-printf 'Verbose activation detail\n'
+printf 'Activating checkFilesChanged\n'
+printf 'Activating checkLinkTargets\n'
+printf 'Activating writeBoundary\n'
+printf 'Activating installPackages\n'
+printf "replacing old 'home-manager-path'\n"
+printf "installing 'home-manager-path'\n"
+printf 'Activating linkGeneration\n'
+printf "Cleaning up orphan links from '%s'\n" "$HOME"
+printf "Creating home file links in '%s'\n" "$HOME"
+printf 'Activating onFilesChange\n'
+printf 'Activating setupLaunchAgents\n'
+printf 'Additional activation detail\n'
+printf 'Custom hook completed in %s\n' "$HOME"
 printf "Existing file '%s/.p10k.zsh' is in the way of '/nix/store/example/.p10k.zsh', will be moved to '%s/.p10k.zsh.hm-backup'\n" \
   "$HOME" "$HOME"
 printf 'There are 293 unread news items. Use "home-manager news" to review them.\n'
@@ -89,19 +108,31 @@ HOME="$test_home" "$test_home/switch" --show-trace > "$test_home/switch-output" 
   || fail "Home Manager runs with English locale"
 grep -Fqx '[+] Home Manager switch' "$test_home/switch-output" \
   || fail "switch prints a Docker-style heading"
-grep -Fqx ' ✔ ~/.codex/skills                Backed up to ~/.codex/skills.hm-backup.1' \
-  "$test_home/switch-output" || fail "switch prints concise backup status"
-grep -Fqx ' ✔ ~/.claude/skills               Backed up to ~/.claude/skills.hm-backup' \
-  "$test_home/switch-output" || fail "switch prints concise backup status"
-grep -Fqx ' ✔ ~/.p10k.zsh                    Backed up to ~/.p10k.zsh.hm-backup' \
-  "$test_home/switch-output" || fail "switch summarizes Home Manager backups"
+assert_switch_status '~/.codex/skills' 'Backed up to ~/.codex/skills.hm-backup.1'
+assert_switch_status '~/.claude/skills' 'Backed up to ~/.claude/skills.hm-backup'
+assert_switch_status '~/.p10k.zsh' 'Backed up to ~/.p10k.zsh.hm-backup'
+assert_switch_status 'Check managed files' 'Done'
+assert_switch_status 'Check link targets' 'Done'
+assert_switch_status 'Create write boundary' 'Done'
+assert_switch_status 'Install packages' 'Done'
+assert_switch_status 'Home Manager package' 'Replaced home-manager-path'
+assert_switch_status 'Home Manager package' 'Installed home-manager-path'
+assert_switch_status 'Link generation' 'Done'
+assert_switch_status 'Home files' 'Removed stale links'
+assert_switch_status 'Home files' 'Linked'
+assert_switch_status 'Run file change hooks' 'Done'
+assert_switch_status 'Set up launch agents' 'Done'
+grep -Fqx '   Additional activation detail' "$test_home/switch-output" \
+  || fail "switch preserves additional activation details"
+grep -Fqx '   Custom hook completed in ~' "$test_home/switch-output" || {
+  cat "$test_home/switch-output" >&2
+  fail "switch shortens home paths in additional details"
+}
 grep -Fqx ' ! Home Manager has unread news; run `home-manager news` to review it.' \
   "$test_home/switch-output" || fail "switch preserves the Home Manager news notice"
-grep -Fqx ' ✔ Home Manager configuration     Applied' "$test_home/switch-output" \
-  || fail "switch prints a concise success status"
-if grep -Fq 'Verbose activation detail' "$test_home/switch-output" \
-  || grep -Fq "$test_home" "$test_home/switch-output"; then
-  fail "successful switch output hides verbose absolute-path logs"
+assert_switch_status 'Home Manager configuration' 'Applied'
+if grep -Fq "$test_home" "$test_home/switch-output"; then
+  fail "successful switch output hides absolute paths"
 fi
 
 mkdir -p "$test_home/nix/store/current-home-manager-files/.codex/skills"

@@ -16,6 +16,13 @@ assert_switch_status() {
     || fail "switch prints status: $1"
 }
 
+assert_switch_progress() {
+  local expected
+  printf -v expected ' › %-30s %s' "$1" "$2"
+  grep -Fqx "$expected" "$test_home/switch-output" \
+    || fail "switch prints progress: $1"
+}
+
 for file in \
   scripts/apps/build.sh \
   scripts/apps/check.sh \
@@ -63,6 +70,14 @@ cat > "$mock_bin/home-manager" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$HOME/home-manager-args"
 printf '%s\n' "${LC_ALL:-unset}" > "$HOME/home-manager-locale"
+if [[ "${HOME_MANAGER_WAIT_FOR_RELEASE:-0}" == 1 ]]; then
+  printf 'Activating checkFilesChanged\n'
+  : > "$HOME/phase-started"
+  while [[ ! -e "$HOME/release-switch" ]]; do
+    sleep 0.05
+  done
+  exit 0
+fi
 printf 'Activating checkFilesChanged\n'
 printf 'Activating checkLinkTargets\n'
 printf 'Activating writeBoundary\n'
@@ -110,18 +125,18 @@ grep -Fqx '[+] Home Manager switch' "$test_home/switch-output" \
   || fail "switch prints a Docker-style heading"
 assert_switch_status '~/.codex/skills' 'Backed up to ~/.codex/skills.hm-backup.1'
 assert_switch_status '~/.claude/skills' 'Backed up to ~/.claude/skills.hm-backup'
-assert_switch_status '~/.p10k.zsh' 'Backed up to ~/.p10k.zsh.hm-backup'
-assert_switch_status 'Check managed files' 'Done'
-assert_switch_status 'Check link targets' 'Done'
-assert_switch_status 'Create write boundary' 'Done'
-assert_switch_status 'Install packages' 'Done'
-assert_switch_status 'Home Manager package' 'Replaced home-manager-path'
-assert_switch_status 'Home Manager package' 'Installed home-manager-path'
-assert_switch_status 'Link generation' 'Done'
-assert_switch_status 'Home files' 'Removed stale links'
-assert_switch_status 'Home files' 'Linked'
-assert_switch_status 'Run file change hooks' 'Done'
-assert_switch_status 'Set up launch agents' 'Done'
+assert_switch_progress '~/.p10k.zsh' 'Backing up to ~/.p10k.zsh.hm-backup'
+assert_switch_progress 'Check managed files' 'Starting'
+assert_switch_progress 'Check link targets' 'Starting'
+assert_switch_progress 'Create write boundary' 'Starting'
+assert_switch_progress 'Install packages' 'Starting'
+assert_switch_progress 'Home Manager package' 'Replacing home-manager-path'
+assert_switch_progress 'Home Manager package' 'Installing home-manager-path'
+assert_switch_progress 'Link generation' 'Starting'
+assert_switch_progress 'Home files' 'Removing stale links'
+assert_switch_progress 'Home files' 'Linking'
+assert_switch_progress 'Run file change hooks' 'Starting'
+assert_switch_progress 'Set up launch agents' 'Starting'
 grep -Fqx '   Additional activation detail' "$test_home/switch-output" \
   || fail "switch preserves additional activation details"
 grep -Fqx '   Custom hook completed in ~' "$test_home/switch-output" || {
@@ -134,6 +149,37 @@ assert_switch_status 'Home Manager configuration' 'Applied'
 if grep -Fq "$test_home" "$test_home/switch-output"; then
   fail "successful switch output hides absolute paths"
 fi
+
+HOME="$test_home" HOME_MANAGER_WAIT_FOR_RELEASE=1 \
+  "$test_home/switch" > "$test_home/stream-output" 2>&1 &
+stream_pid=$!
+attempt=0
+while [[ ! -f "$test_home/phase-started" && "$attempt" -lt 100 ]]; do
+  sleep 0.05
+  attempt=$((attempt + 1))
+done
+
+stream_line=''
+printf -v stream_line ' › %-30s %s' 'Check managed files' 'Starting'
+attempt=0
+while [[ -f "$test_home/phase-started" && "$attempt" -lt 100 ]] \
+  && ! grep -Fqx "$stream_line" "$test_home/stream-output"; do
+  sleep 0.05
+  attempt=$((attempt + 1))
+done
+stream_progress_visible=0
+if grep -Fqx "$stream_line" "$test_home/stream-output"; then
+  stream_progress_visible=1
+fi
+touch "$test_home/release-switch"
+set +e
+wait "$stream_pid"
+stream_status=$?
+set -e
+[[ -f "$test_home/phase-started" ]] || fail "switch starts the mocked activation"
+[[ "$stream_status" == 0 ]] || fail "streamed switch completes successfully"
+[[ "$stream_progress_visible" == 1 ]] \
+  || fail "switch streams activation progress before completion"
 
 mkdir -p "$test_home/nix/store/current-home-manager-files/.codex/skills"
 ln -s "$test_home/nix/store/current-home-manager-files/.codex/skills" \

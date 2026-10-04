@@ -45,4 +45,45 @@ while IFS= read -r nix_file; do
   fi
 done < <(find "$repo_root" -type f -name '*.nix' -print)
 
+test_home="$(mktemp -d)"
+trap 'rm -rf "$test_home"' EXIT
+mock_bin="$test_home/bin"
+mkdir -p "$mock_bin" "$test_home/.codex" "$test_home/.claude" "$test_home/old-skills"
+ln -s "$test_home/old-skills" "$test_home/.codex/skills"
+ln -s "$test_home/old-skills" "$test_home/.claude/skills"
+printf 'keep existing backup\n' > "$test_home/.codex/skills.hm-backup"
+cat > "$mock_bin/home-manager" <<'MOCK'
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "$HOME/home-manager-args"
+MOCK
+chmod +x "$mock_bin/home-manager"
+
+sed \
+  -e "s|@HOME_MANAGER_BIN@|$mock_bin/home-manager|g" \
+  -e "s|@NIX_STORE_DIR@|$test_home/nix/store|g" \
+  -e 's|@FLAKE_REF@|test-flake|g' \
+  "$repo_root/scripts/apps/switch.sh" > "$test_home/switch"
+chmod +x "$test_home/switch"
+HOME="$test_home" "$test_home/switch" --show-trace
+
+[[ -L "$test_home/.codex/skills.hm-backup.1" ]] \
+  || fail "existing Codex skills directory symlink is preserved without clobbering a backup"
+[[ -L "$test_home/.claude/skills.hm-backup" ]] \
+  || fail "existing Claude skills directory symlink is preserved"
+[[ -d "$test_home/old-skills" ]] \
+  || fail "backing up directory symlinks preserves their shared target"
+[[ "$(cat "$test_home/.codex/skills.hm-backup")" == 'keep existing backup' ]] \
+  || fail "existing backup is not overwritten"
+[[ "$(cat "$test_home/home-manager-args")" == 'switch -b hm-backup --impure --flake test-flake --show-trace' ]] \
+  || fail "Home Manager switch runs after preserving directory symlinks"
+
+mkdir -p "$test_home/nix/store/current-home-manager-files/.codex/skills"
+ln -s "$test_home/nix/store/current-home-manager-files/.codex/skills" \
+  "$test_home/.codex/skills"
+HOME="$test_home" "$test_home/switch"
+[[ -L "$test_home/.codex/skills" ]] \
+  || fail "Home Manager-owned directory symlink is left in place"
+[[ ! -e "$test_home/.codex/skills.hm-backup.2" ]] \
+  || fail "Home Manager-owned directory symlink is not backed up again"
+
 printf 'ok: shell scripts are kept in .sh files\n'

@@ -52,6 +52,7 @@ in
       mkScript "switch" ../scripts/apps/switch.sh {
         HOME_MANAGER_BIN = homeManagerBin;
         FLAKE_REF = flakeRef;
+        NIX_STORE_DIR = builtins.storeDir;
       }
     );
     meta.description = "Apply the Home Manager configuration for this repo";

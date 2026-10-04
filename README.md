@@ -95,6 +95,7 @@ codex -m gpt-6-astra
 
 ## Docs
 
+- [Nix flake commands](doc/nix-flake-commands.md)
 - [Install and switching](doc/nix-install.md)
 - [Update flow](doc/update.md)
 - [Repo notes](doc/notes.md)

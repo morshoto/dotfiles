@@ -19,10 +19,25 @@ let
     switch = "Apply the Home Manager configuration for this repo";
     update = "Update flake inputs, show revisions, and apply the Home Manager configuration";
   };
+  commandNames = builtins.attrNames appDescriptions;
+  commandWidth = builtins.foldl' (
+    width: name:
+    let
+      nameWidth = builtins.stringLength "nix run .#${name}";
+    in
+    if nameWidth > width then nameWidth else width
+  ) 0 commandNames;
   helpCommandList = builtins.concatStringsSep "\n" (
-    builtins.map (name: "  nix run .#${name}  ${appDescriptions.${name}}") (
-      builtins.attrNames appDescriptions
-    )
+    builtins.map (
+      name:
+      let
+        command = "nix run .#${name}";
+        padding = pkgs.lib.concatStrings (
+          pkgs.lib.genList (_: " ") (commandWidth - builtins.stringLength command + 2)
+        );
+      in
+      "  ${command}${padding}${appDescriptions.${name}}"
+    ) commandNames
   );
   mkScript =
     name: file: substitutions:

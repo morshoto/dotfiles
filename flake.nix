@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    codexNixpkgs.url = "github:nixos/nixpkgs/master";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -16,6 +17,7 @@
   outputs =
     {
       nixpkgs,
+      codexNixpkgs,
       home-manager,
       nix-darwin,
       ...
@@ -41,6 +43,7 @@
         host:
         import nixpkgs {
           inherit (host) system;
+          overlays = [ (import ./nix/overlays/default.nix codexNixpkgs) ];
           config = {
             allowUnfreePredicate = pkg: pkg.pname == "terraform";
           };

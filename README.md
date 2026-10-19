@@ -40,8 +40,8 @@ nix develop "path:$PWD"
 # Show flake outputs
 nix flake show "path:$PWD"
 
-# Compatibility install for profile-based usage
-nix profile add "path:$PWD#dotfiles-pkg"
+# Alternative profile install (use instead of Home Manager)
+nix profile install "path:$PWD#dotfiles-pkg"
 ```
 
 ## Codex model selection

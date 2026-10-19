@@ -21,8 +21,18 @@ nix run "path:$PWD#build"
 git diff -- flake.lock
 ```
 
-If you still rely on the compatibility profile bundle, refresh it explicitly:
+The `dotfiles-pkg` compatibility bundle contains the same commands as
+Home Manager. Use one installation method at a time: adding the bundle to the
+profile managed by Home Manager can create file conflicts.
+
+If you use the profile bundle instead of Home Manager, install it once with:
 
 ```sh
-nix profile add "path:$PWD#dotfiles-pkg"
+nix profile install "path:$PWD#dotfiles-pkg"
+```
+
+After updating `flake.lock`, refresh that existing profile entry with:
+
+```sh
+nix profile upgrade dotfiles-pkg
 ```

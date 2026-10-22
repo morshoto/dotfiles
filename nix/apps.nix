@@ -14,8 +14,10 @@ let
     build = "Build the Home Manager configuration for this repo";
     check = "Run flake checks for this repo";
     darwin-switch = "Apply the nix-darwin and Home Manager configuration";
+    export-vscode-extensions = "Review and add installed VS Code extensions to the manifest";
     fmt = "Format Nix files for this repo";
     help = "List available Nix flake commands";
+    install-vscode-extensions = "Install missing VS Code extensions from the manifest";
     switch = "Apply the Home Manager configuration for this repo";
     update = "Update flake inputs, show revisions, and apply the Home Manager configuration";
   };
@@ -65,6 +67,14 @@ in
     meta.description = appDescriptions.check;
   };
 
+  export-vscode-extensions = {
+    type = "app";
+    program = toString (
+      mkScript "export-vscode-extensions" ../scripts/apps/export-vscode-extensions.sh { }
+    );
+    meta.description = appDescriptions.export-vscode-extensions;
+  };
+
   fmt = {
     type = "app";
     program = toString (
@@ -83,6 +93,14 @@ in
       }
     );
     meta.description = appDescriptions.help;
+  };
+
+  install-vscode-extensions = {
+    type = "app";
+    program = toString (
+      mkScript "install-vscode-extensions" ../scripts/apps/install-vscode-extensions.sh { }
+    );
+    meta.description = appDescriptions.install-vscode-extensions;
   };
 
   switch = {

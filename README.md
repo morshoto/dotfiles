@@ -40,6 +40,12 @@ nix develop "path:$PWD"
 # Show flake outputs
 nix flake show "path:$PWD"
 
+# Review installed VS Code extensions for the curated manifest
+nix run "path:$PWD#export-vscode-extensions"
+
+# Install manifest extensions on a Mac with VS Code
+nix run "path:$PWD#install-vscode-extensions"
+
 # Alternative profile install (use instead of Home Manager)
 nix profile install "path:$PWD#dotfiles-pkg"
 ```
@@ -69,6 +75,7 @@ codex -m gpt-6-astra
 ├── nix/
 ├── scripts/
 ├── tests/
+├── vscode/
 ├── zsh/
 └── flake.nix
 ```
@@ -92,6 +99,8 @@ codex -m gpt-6-astra
   [Codex configuration](codex/README.md) for applying and editing them.
 - `dotfiles-pkg` remains available for `nix profile` compatibility, but
   `home.packages` is the primary source of truth.
+- VS Code extension IDs are curated in `vscode/extensions.txt`; export lists
+  candidates, and only explicit `--add` selections change the manifest.
 
 ## Docs
 

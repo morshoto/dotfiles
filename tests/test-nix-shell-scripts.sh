@@ -27,8 +27,10 @@ for file in \
   scripts/apps/build.sh \
   scripts/apps/check.sh \
   scripts/apps/darwin-switch.sh \
+  scripts/apps/export-vscode-extensions.sh \
   scripts/apps/fmt.sh \
   scripts/apps/help.sh \
+  scripts/apps/install-vscode-extensions.sh \
   scripts/apps/switch.sh \
   scripts/apps/update.sh \
   scripts/install-agent-browser.sh \
@@ -39,7 +41,7 @@ for file in \
   [[ -f "$repo_root/$file" ]] || fail "shell implementation lives in $file"
 done
 
-for script in build check darwin-switch fmt help switch update; do
+for script in build check darwin-switch export-vscode-extensions fmt help install-vscode-extensions switch update; do
   grep -Fq "mkScript \"$script\" ../scripts/apps/$script.sh" "$repo_root/nix/apps.nix" \
     || fail "Nix app reads scripts/apps/$script.sh"
 done

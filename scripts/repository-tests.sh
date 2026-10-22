@@ -14,6 +14,7 @@ for test_script in \
   "$src/tests/test-codex-config.sh" \
   "$src/tests/test-zsh-config.sh" \
   "$src/tests/test-nix-shell-scripts.sh" \
+  "$src/tests/test-vscode-extensions.sh" \
   "$src/tests/test-help-app.sh"; do
   bash "$test_script"
 done

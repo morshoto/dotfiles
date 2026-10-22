@@ -16,6 +16,7 @@ contents were not copied or read.
 | Ghostty | `ghostty/config` | Home Manager with `nix run "path:$PWD#switch"` |
 | Codex and Claude instructions and skills | `codex/`, `ai/skills/`, `nix/home/ai.nix` | Home Manager with `nix run "path:$PWD#switch"` |
 | macOS defaults | `nix/darwin/default.nix` | nix-darwin with `nix run "path:$PWD#darwin-switch"` |
+| Curated VS Code extensions | `vscode/extensions.txt` | Review with `nix run "path:$PWD#export-vscode-extensions"`; add chosen installed IDs with `-- --add publisher.extension`; install missing IDs with `nix run "path:$PWD#install-vscode-extensions"` |
 
 The macOS defaults currently declare `AppleShowAllExtensions` and Dock
 auto-hide. The Home Manager switch app backs up conflicting files with the
@@ -31,6 +32,9 @@ auto-hide. The Home Manager switch app backs up conflicting files with the
   editor. `settings.json` and `keybindings.json` remain local pending a focused
   portability review. `mcp.json` and `chatLanguageModels.json` are private
   service and model state and stay outside the repository.
+- The extension manifest starts empty. The export command shows candidates
+  without saving them; add only IDs intended for every Mac. Extension versions
+  are not pinned. Neither bootstrap nor Home Manager installs extensions.
 - The Powerlevel10k theme checkout at `~/powerlevel10k` remains a locally
   installed dependency. This change manages the prompt preferences; it does not
   vendor or pin the theme code.

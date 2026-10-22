@@ -23,6 +23,7 @@ the repository root.
 | `nix run "path:$PWD#switch"` | Apply the Home Manager configuration for the current user with English live progress and the unread-news count when available. Existing files and conflicting skill-directory symlinks are preserved with an `hm-backup` suffix; full activation details are shown if the switch fails. |
 | `nix run "path:$PWD#darwin-switch"` | Apply nix-darwin system settings and Home Manager; this command uses `sudo`. |
 | `./scripts/bootstrap` | Set up a fresh supported Apple Silicon Mac and apply its Home Manager configuration. |
+| `nix run "path:$PWD#install-vscode-extensions"` | Install missing IDs from the curated `vscode/extensions.txt` manifest with VS Code's `code` command. Existing extra extensions are left alone. |
 
 ## Maintain the flake
 
@@ -31,6 +32,7 @@ the repository root.
 | `nix run "path:$PWD#fmt"` | Format Nix files below the current directory. Add `-- --check` to check formatting without writing changes. |
 | `nix flake update --flake "path:$PWD"` | Update the locked flake inputs without applying the configuration. |
 | `nix run "path:$PWD#update"` | Update flake inputs, list changed inputs with their old and new revisions, then apply the Home Manager configuration. This modifies `flake.lock` and may change installed packages. |
+| `nix run "path:$PWD#export-vscode-extensions"` | List installed extension IDs absent from `vscode/extensions.txt`, without changing files. Use `-- --add publisher.extension` to add an installed ID, then review `git diff -- vscode/extensions.txt`. Repeat `--add` for multiple IDs. |
 | `nix develop "path:$PWD"` | Enter the repository's development shell. |
 | `nix profile add "path:$PWD#dotfiles-pkg"` | Install the compatibility package into a Nix profile. Home Manager is the primary package manager for this repository. |
 
